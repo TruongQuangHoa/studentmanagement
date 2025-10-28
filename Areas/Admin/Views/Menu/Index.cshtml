@@ -1,0 +1,76 @@
+@using StudentManagement.Models;
+@model IList<tblMenu>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách chức năng</h2>
+
+        <p>
+            
+        <section class="section dashboard">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto">
+                        <div class="card-body mt-4">
+                            <table class="table table-borderless datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="col-1 text-center">#</th>
+                                        <th class="col-3 text-center">Tên Menu </th>
+                                        <th class="col-2 text-center">Cấp bậc</th>
+                                        <th class="col-2 text-center">Mã cha </th>
+                                        <th class="col-1 text-center">Thứ tự </th>
+                                        <th class="col-1 text-center">Hiện thị </th>
+                                        <th class="col-1 text-center">Chức năng </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="text-center" scope="row">@item.MenuID</td>
+                                            <td class="text-left text-primary text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="Menu" asp-action="Details"
+                                                    asp-route-id="@item.MenuID">
+                                                    @item.MenuName
+                                                </a>
+                                            </td>
+                                            <td class="text-center" scope="row">@item.Levels</td>
+                                            <td class="text-center" scope="row">@item.ParentID</td>
+                                            <td class="text-center" scope="row">@item.MenuOrder</td>
+                                            <td class="text-center">
+                                                <form asp-area="Admin" asp-controller="Menu" asp-action="ToggleStatus" method="post">
+                                                    <input type="hidden" name="id" value="@item.MenuID" />
+                                                    <div class="form-check form-switch d-flex justify-content-center">
+                                                        <input class="form-check-input toggle-status-switch" type="checkbox" name="IsActive"
+                                                               @(item.IsActive ? "checked" : "") onchange="this.form.submit()" />
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td class="text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="Menu" asp-action="Edit"
+                                                    asp-route-id="@item.MenuID" class="btn btn-primary btn-sm"
+                                                    title="Edit the menu"><i class="bi bi-pencil"></i></a>
+                                                <a asp-area="Admin" asp-controller="Menu" asp-action="Delete"
+                                                    asp-route-id="@item.MenuID" class="btn btn-danger btn-sm"
+                                                    title="Delete the menu"><i class="bi bi-trash"></i></a>
+                                                    
+                                            </td>
+
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </p>
+
+    </div>
+</main>

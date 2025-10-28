@@ -1,0 +1,73 @@
+@using StudentManagement.Models;
+@model IList<tblCohort>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách chức năng</h2>
+
+        <p>
+        <section class="section dashboard">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto">
+                        <div class="card-body mt-4">
+                            <table class="table table-borderless datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="col-3 text-center">Mã</th>
+                                        <th class="col-2 text-center">Năm vào</th>
+                                        <th class="col-2 text-center">Năm ra</th>
+                                        <th class="col-1 text-center">Niên khóa</th>
+                                        <th class="col-1 text-center">Hiện thị</th>
+                                        <th class="col-1 text-center">Chức năng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="text-left text-primary text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="QLKhoaHoc" asp-action="Details"
+                                                    asp-route-id="@item.CohortID">
+                                                    @item.CohortID
+                                                </a>
+                                            </td>
+                                            <td class="text-center" scope="row">@item.StartYear</td>
+                                            <td class="text-center" scope="row">@item.EndYear</td>
+                                            <td class="text-center" scope="row">@item.CohortName</td>
+
+                                            <td class="text-center">
+                                                <form asp-area="Admin" asp-controller="Cohort" asp-action="Trangthai"
+                                                    method="post">
+                                                    <input type="hidden" name="id" value="@item.CohortID" />
+                                                    <div class="form-check form-switch d-flex justify-content-center">
+                                                        <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                            name="IsActive" @(item.IsActive ? "checked" : "")
+                                                            onchange="this.form.submit()" />
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td class="text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="Cohort" asp-action="Edit"
+                                                    asp-route-id="@item.CohortID" class="btn btn-primary btn-sm"
+                                                    title="Edit the Cohort"><i class="bi bi-pencil"></i></a>
+                                                <a asp-area="Admin" asp-controller="Cohort" asp-action="Delete"
+                                                    asp-route-id="@item.CohortID" class="btn btn-danger btn-sm"
+                                                    title="Delete the Cohort"><i class="bi bi-trash"></i></a>
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </p>
+
+    </div>
+</main>

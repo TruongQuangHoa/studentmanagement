@@ -1,0 +1,48 @@
+@model StudentManagement.Models.tblStudent
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa học sinh</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Edit">
+            <div class="form-row">
+                <input type="text" class="form-contro" asp-for ="StudentClassID" type="hidden">
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mã học sinh</label>
+                    <input type="text" class="form-control" asp-for="StudentID" placeholder="Mã học sinh...">
+                    <span asp-validation-for="StudentID" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mã lớp học</label>
+                    <input type="text" class="form-control" asp-for="ClassID" placeholder="Mã lớp học...">
+                    <span asp-validation-for="ClassID" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mã khóa</label>
+                    <input type="text" class="form-control" asp-for="CohortID" placeholder="Mã khóa...">
+                    <span asp-validation-for="CohortID" class="alert-danger"></span>
+                </div>
+                
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive",Model.IsActive)
+                        Hiện thị 
+                    </label>
+                </div>
+            </div>
+            <a asp-controller="Student" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+               Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>

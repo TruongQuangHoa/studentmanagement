@@ -1,0 +1,86 @@
+@using StudentManagement.Models;
+@model IList<tblClass>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách chức năng</h2>
+
+        <p>
+
+        <section class="section dashboard">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto">
+                        <div class="card-body mt-4">
+                            <table class="table table-borderless datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="col-1 text-center">Mã lớp</th>
+                                        <th class="col-1 text-center">Tên lớp</th>
+                                        <th class="col-1 text-center">Mã khối</th>
+                                        <th class="col-1 text-center">Số lượng</th>
+                                        <th class="col-2 text-center">Năm học</th>
+                                        <th class="col-2 text-center">Niên khóa</th>
+                                        <th class="col-1 text-center">Hiện thị</th>
+                                        <th class="col-1 text-center">Chức năng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="text-center" scope="row">@item.ClassID</td>
+                                            <td class="text-left text-primary text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="QLLopHoc" asp-action="Details"
+                                                    asp-route-id="@item.ClassID">
+                                                    @item.ClassName
+                                                </a>
+                                            </td>
+                                            <td class="text-center" scope="row">@item.grade?.GradeName</td>
+                                            <td class="text-center" scope="row">@item.NumberOfStudent</td>
+                                            <td class="text-center" scope="row">@item.SchoolYear</td>
+                                            <td class="text-center">
+                                                @(
+                                                    item.cohort != null
+                                                    ? item.cohort.StartYear + " - " + item.cohort.EndYear + " - Khóa " +
+                                                    item.cohort.CohortName
+                                                    : "Chưa có khóa học"
+                                                )
+                                            </td>
+
+                                            <td class="text-center">
+                                                <form asp-area="Admin" asp-controller="Class" asp-action="ToggleStatus"
+                                                    method="post">
+                                                    <input type="hidden" name="id" value="@item.ClassID" />
+                                                    <div class="form-check form-switch d-flex justify-content-center">
+                                                        <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                            name="IsActive" @(item.IsActive ? "checked" : "")
+                                                            onchange="this.form.submit()" />
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td class="text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="Class" asp-action="Edit"
+                                                    asp-route-id="@item.ClassID" class="btn btn-primary btn-sm"
+                                                    title="Edit the Class"><i class="bi bi-pencil"></i></a>
+                                                <a asp-area="Admin" asp-controller="Class" asp-action="Delete"
+                                                    asp-route-id="@item.ClassID" class="btn btn-danger btn-sm"
+                                                    title="Delete the Class"><i class="bi bi-trash"></i></a>
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </p>
+
+
+    </div>
+</main>
