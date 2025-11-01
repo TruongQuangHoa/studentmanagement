@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using StudentManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-using StudentManagement.Models;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
@@ -28,7 +28,6 @@ namespace StudentManagement.Areas.Admin.Controllers
 
         public IActionResult Delete(int? id)
         {
-           
             if (id == null || id == 0)
                 return NotFound();
             var mn = _context.Menus.Find(id);
@@ -37,10 +36,9 @@ namespace StudentManagement.Areas.Admin.Controllers
             return View(mn);
         }
         [HttpPost]
-
         public IActionResult Delete(int id)
         {
-            
+
             var delMenu = _context.Menus.Find(id);
             if (delMenu == null)
                 return NotFound();
@@ -51,7 +49,6 @@ namespace StudentManagement.Areas.Admin.Controllers
 
         public IActionResult Create()
         {
-          
             var mnList = (from m in _context.Menus
                           select new SelectListItem()
                           {
@@ -69,7 +66,7 @@ namespace StudentManagement.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Create(tblMenu mn)
         {
-          
+
             if (ModelState.IsValid)
             {
                 _context.Menus.Add(mn);
@@ -80,7 +77,6 @@ namespace StudentManagement.Areas.Admin.Controllers
         }
         public IActionResult Edit(int? id)
         {
-             
             if (id == null || id == 0)
                 return NotFound();
             var mn = _context.Menus.Find(id);
@@ -92,23 +88,18 @@ namespace StudentManagement.Areas.Admin.Controllers
                           {
                               Text = (m.Levels == 1) ? m.MenuName : "--" + m.MenuName,
                               Value = m.MenuID.ToString()
-                          }
-
-            ).ToList();
+                          }).ToList();
             mnList.Insert(0, new SelectListItem()
             {
                 Text = "---select---",
                 Value = "0"
-            }
-            );
+            });
             ViewBag.mnList = mnList;
             return View(mn);
-
         }
         [HttpPost]
         public IActionResult Edit(tblMenu mn)
         {
-           
             if (ModelState.IsValid)
             {
                 _context.Menus.Update(mn);

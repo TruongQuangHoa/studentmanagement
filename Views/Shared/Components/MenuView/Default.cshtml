@@ -1,17 +1,17 @@
 @model List<StudentManagement.Models.tblMenu>
+
 <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
         @foreach (var item in Model.Where(m => m.Levels == 1 && m.IsActive).OrderBy(m => m.MenuOrder))
         {
             var pID = item.MenuID;
-            var sMenu = Model.Where(p => p.ParentID == pID && p.IsActive).OrderBy(p => p.MenuOrder).ToList(); // cấp 2
+            var sMenu = Model.Where(p => p.ParentID == pID && p.IsActive).OrderBy(p => p.MenuOrder).ToList();
             var hasSubMenu = sMenu.Any();
 
             <li class="nav-item">
-                <a class="nav-link @(hasSubMenu ? "collapsed" : "")"
-                   data-bs-toggle="@(hasSubMenu ? "collapse" : null)"
-                   data-bs-target="#menu-@item.MenuID"
-                   href="@(!hasSubMenu ? Url.Action(item.ActionName, item.ControllerName) : "#")">
+                <a class="nav-link @(hasSubMenu ? "collapsed" : "")" data-bs-toggle="@(hasSubMenu ? "collapse" : null)"
+                    data-bs-target="#menu-@item.MenuID"
+                    href="@(!hasSubMenu ? Url.Action(item.ActionName, item.ControllerName) : "#")">
                     <i class="@(!string.IsNullOrWhiteSpace(item.Icon) ? item.Icon : "bi bi-circle")"></i>
                     <span>@item.MenuName</span>
                     @if (hasSubMenu)
@@ -25,14 +25,14 @@
                     <ul id="menu-@item.MenuID" class="nav-content collapse" data-bs-parent="#sidebar-nav">
                         @foreach (var smn in sMenu)
                         {
-                            var subSubMenu = Model.Where(p => p.ParentID == smn.MenuID && p.IsActive).OrderBy(p => p.MenuOrder).ToList(); // cấp 3
+                            var subSubMenu = Model.Where(p => p.ParentID == smn.MenuID && p.IsActive).OrderBy(p =>
+                            p.MenuOrder).ToList();
                             var hasThirdLevel = subSubMenu.Any();
 
                             <li>
                                 <a class="nav-link @(hasThirdLevel ? "collapsed" : "")"
-                                   data-bs-toggle="@(hasThirdLevel ? "collapse" : null)"
-                                   data-bs-target="#submenu-@smn.MenuID"
-                                   href="@(!hasThirdLevel ? Url.Action(smn.ActionName, smn.ControllerName) : "#")">
+                                    data-bs-toggle="@(hasThirdLevel ? "collapse" : null)" data-bs-target="#submenu-@smn.MenuID"
+                                    href="@(!hasThirdLevel ? Url.Action(smn.ActionName, smn.ControllerName) : "#")">
                                     <i class="@(!string.IsNullOrWhiteSpace(smn.Icon) ? smn.Icon : "bi bi-circle")"></i>
                                     <span>@smn.MenuName</span>
                                     @if (hasThirdLevel)
@@ -65,17 +65,17 @@
 </aside>
 
 <style>
-    /* Chỉnh font-size cho menu cấp 2 */
-    .sidebar .nav-content > li > a {
+    .sidebar .nav-content>li>a {
         font-size: 15px;
     }
 
-    .sidebar .nav-content > li > a i {
+    .sidebar .nav-content>li>a i {
         font-size: 15px;
         margin-right: 6px;
     }
-    .sidebar-nav .nav-link{
-        color:#333;
+
+    .sidebar-nav .nav-link {
+        color: #333;
         background-color: #fff;
     }
 </style>

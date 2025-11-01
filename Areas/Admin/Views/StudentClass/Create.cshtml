@@ -1,0 +1,58 @@
+@model StudentManagement.Models.tblStudentClass
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Thêm mới Học sinh - Lớp học</h2>
+    </div>
+
+    <div class="container shadow p-5">
+        <form method="post" asp-action="Create">
+            <div class="form-row">
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Học sinh</label>
+                    <select asp-for="StudentID" class="form-control"
+                        asp-items="@(ViewBag.StudentList != null ? new SelectList(ViewBag.StudentList, "Value", "Text") : new SelectList(new List<object>()))">
+                        <option value="">--- Chọn học sinh ---</option>
+                    </select>
+
+                    <span asp-validation-for="StudentID" class="text-danger"></span>
+                </div>
+                <!-- Khóa học -->
+                <div class="form-group col-md-4 mb-3">
+                    <label>Khóa</label>
+                    <select asp-for="CohortID" class="form-control" asp-items="@(ViewBag.CohortList as SelectList)">
+                        <option value="">--- Chọn khóa học ---</option>
+                    </select>
+                    <span asp-validation-for="CohortID" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label>Lớp học</label>
+                    <select asp-for="ClassID" class="form-control"
+                        asp-items="@(new SelectList(ViewBag.ClassList, "Value", "Text"))">
+                        <option value="">--- Chọn lớp học ---</option>
+                    </select>
+                    <span asp-validation-for="ClassID" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", false)
+                        Hiện thị
+                    </label>
+                </div>
+            </div>
+
+            <a asp-controller="StudentClass" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i> Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>

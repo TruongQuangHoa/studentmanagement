@@ -13,13 +13,13 @@
 
                 <div class="form-group col-md-6 mb-3">
                     <label>Năm vào</label>
-                    <input type="number" class="form-control" asp-for="StartYear" placeholder="Năm vào..." id="startYear">
+                    <input type="number" class="form-control" asp-for="StartYear" placeholder="Năm vào..." id="startYear" required>
                     <span asp-validation-for="StartYear" class="alert-danger"></span>
                 </div>
 
                 <div class="form-group col-md-6 mb-3">
                     <label>Năm ra</label>
-                    <input type="number" class="form-control" asp-for="EndYear" placeholder="Năm ra..." id="endYear">
+                    <input type="number" class="form-control" asp-for="EndYear" placeholder="Năm ra..." id="endYear" readonly>
                     <span asp-validation-for="EndYear" class="alert-danger"></span>
                 </div>
 
@@ -54,12 +54,12 @@
         const start = parseInt(startYearInput.value);
 
         if (!isNaN(start)) {
-            // Gợi ý năm ra = năm vào + 3
-            const suggestedEnd = start + 3;
+            // Gợi ý năm ra = năm vào + 4
+            const suggestedEnd = start + 4;
             endYearInput.value = suggestedEnd;
 
-            // Tính niên khóa = EndYear - StartYear + 1
-            const cohortName = suggestedEnd - start + 1;
+            // Tính niên khóa
+            const cohortName = start - 1959;
             cohortNameInput.value = cohortName;
         } else {
             endYearInput.value = "";

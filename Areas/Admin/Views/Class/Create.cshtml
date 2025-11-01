@@ -17,31 +17,40 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Mã khối</label>
-                    <select asp-for="GradeID" class="form-control" asp-items="ViewBag.gdList">
-                        <option value="">--- Chọn khối ---</option>
+                    <select asp-for="GradeID" class="form-control"
+                        asp-items="@(new SelectList(ViewBag.gdList, "Value", "Text"))">
                     </select>
+                    <span asp-validation-for="GradeID" class="alert-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label>Số lượng</label>
-                    <input type="text" class="form-control" asp-for="NumberOfStudent" placeholder="Nhập số lượng...">
+                    <label>Số lượng tối đa</label>
+                    <input type="text" class="form-control" asp-for="MaxStudents" placeholder="Nhập số lượng tối da...">
+                    <span asp-validation-for="MaxStudents" class="alert-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Số lượng hiện tại</label>
+                    <input type="text" class="form-control" asp-for="CurrentStudents"
+                        placeholder="Nhập số lượng hiện tại...">
+                    <span asp-validation-for="CurrentStudents" class="alert-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Năm học</label>
                     <input type="text" class="form-control" asp-for="SchoolYear" placeholder="Nhập năm học...">
+                    <span asp-validation-for="SchoolYear" class="alert-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Mã Khóa<span class="text-danger">*</span></label>
-                    <select asp-for="CohortID" class="form-control" asp-items="ViewBag.chList">
+                    <select asp-for="CohortID" class="form-control" asp-items="ViewBag.chList" required>
                         <option value="">--- Khóa ---</option>
                     </select>
-                    <span asp-validation-for="CohortID" class="text-danger"></span>
+                    <span asp-validation-for="CohortID" class="alert-danger"></span>
                 </div>
 
-                <div class="
-                 col-md-6 mb-3">
+                <div class="col-md-6 mb-3">
                     <label>
                         @Html.CheckBox("IsActive", false)
                         Hiện thị

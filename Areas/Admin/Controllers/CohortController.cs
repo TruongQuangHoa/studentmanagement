@@ -52,7 +52,6 @@ namespace StudentManagement.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Create(tblCohort ch)
         {
-
             if (ModelState.IsValid)
             {
                 _context.Cohorts.Add(ch);
@@ -61,7 +60,7 @@ namespace StudentManagement.Areas.Admin.Controllers
             }
             return View(ch);
         }
-    
+
         public IActionResult Edit(int? id)
         {
             if (id == null || id == 0)
@@ -85,13 +84,26 @@ namespace StudentManagement.Areas.Admin.Controllers
             existing.StartYear = ch.StartYear;
             existing.EndYear = ch.EndYear;
 
-            // Niên khóa tự động dựa trên StartYear so với mốc 2024 → 60
             existing.CohortName = 60 + (ch.StartYear - 2024);
 
             existing.IsActive = ch.IsActive;
 
             _context.SaveChanges();
             return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var cohort = await _context.Cohorts.FindAsync(id);
+            if (cohort == null)
+                return NotFound();
+
+            cohort.IsActive = !cohort.IsActive;
+
+            _context.Update(cohort);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

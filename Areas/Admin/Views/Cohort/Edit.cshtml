@@ -15,30 +15,31 @@
                 <div class="form-group col-md-6 mb-3">
                     <label>Năm vào</label>
                     <input type="number" class="form-control" asp-for="StartYear" placeholder="Năm vào..."
-                        id="startYear">
+                        id="startYear" required>
                     <span asp-validation-for="StartYear" class="alert-danger"></span>
                 </div>
 
                 <div class="form-group col-md-6 mb-3">
                     <label>Năm ra</label>
-                    <input type="number" class="form-control" asp-for="EndYear" placeholder="Năm ra..." id="endYear">
+                    <input type="number" class="form-control" asp-for="EndYear" placeholder="Năm ra..." id="endYear"
+                        readonly>
                     <span asp-validation-for="EndYear" class="alert-danger"></span>
                 </div>
 
                 <div class="form-group col-md-6 mb-3">
                     <label>Niên khóa</label>
-                    <input type="text" class="form-control" asp-for="CohortName" placeholder="Niên khóa..." id="cohortName"
-                        readonly>
+                    <input type="text" class="form-control" asp-for="CohortName" placeholder="Niên khóa..."
+                        id="cohortName" readonly>
                 </div>
 
             </div>
             <div class="form-group col-md-6 mb-3">
-                        <div class="form-check mt-3">
-                            @Html.CheckBox("IsActive",true, new { @class = "form-check-input", id = "IsActive" })
-                            <label class="form-check-label" for="IsActive">Hiển thị</label>
-                        </div>
+                <div class="form-check mt-3">
+                    @Html.CheckBox("IsActive", true, new { @class = "form-check-input", id = "IsActive" })
+                    <label class="form-check-label" for="IsActive">Hiển thị</label>
+                </div>
 
-                    </div>
+            </div>
 
             <a asp-controller="Cohort" asp-action="Index" class="btn btn-lg btn-warning p-2">
                 <i class="bi bi-arrow-left-circle"></i> Quay lại
@@ -60,8 +61,8 @@
         const start = parseInt(startYearInput.value);
 
         if (!isNaN(start)) {
-            // Gợi ý năm ra = năm vào + 3
-            const suggestedEnd = start + 3;
+            // Gợi ý năm ra = năm vào + 4
+            const suggestedEnd = start + 4;
             endYearInput.value = suggestedEnd;
 
             // Tính niên khóa = EndYear - StartYear + 1

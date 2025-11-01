@@ -8,7 +8,6 @@
         <h2>Danh sách chức năng</h2>
 
         <p>
-            
         <section class="section dashboard">
             <div class="row">
                 <div class="col-12">
@@ -17,21 +16,24 @@
                             <table class="table table-borderless datatable">
                                 <thead>
                                     <tr>
-                                        <th class="col-1 text-center">#</th>
-                                        <th class="col-3 text-center">Tên Menu </th>
-                                        <th class="col-2 text-center">Cấp bậc</th>
-                                        <th class="col-2 text-center">Mã cha </th>
+                                        <th class="col-1 text-center">STT</th>
+                                        <th class="col-2 text-center">Tên Menu </th>
+                                        <th class="col-1 text-center">Cấp bậc </th>
+                                        <th class="col-1 text-center">Mã cha </th>
                                         <th class="col-1 text-center">Thứ tự </th>
                                         <th class="col-1 text-center">Hiện thị </th>
                                         <th class="col-1 text-center">Chức năng </th>
-
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @{
+                                        int stt = 0; // 1. Khai báo và khởi tạo biến đếm
+                                    }
                                     @foreach (var item in Model)
                                     {
+                                        stt++; // 2. Tăng biến đếm cho mỗi mục
                                         <tr>
-                                            <td class="text-center" scope="row">@item.MenuID</td>
+                                            <td class="text-center" scope="row">@stt</td>
                                             <td class="text-left text-primary text-center" scope="row">
                                                 <a asp-area="Admin" asp-controller="Menu" asp-action="Details"
                                                     asp-route-id="@item.MenuID">
@@ -42,11 +44,13 @@
                                             <td class="text-center" scope="row">@item.ParentID</td>
                                             <td class="text-center" scope="row">@item.MenuOrder</td>
                                             <td class="text-center">
-                                                <form asp-area="Admin" asp-controller="Menu" asp-action="ToggleStatus" method="post">
+                                                <form asp-area="Admin" asp-controller="Menu" asp-action="ToggleStatus"
+                                                    method="post">
                                                     <input type="hidden" name="id" value="@item.MenuID" />
                                                     <div class="form-check form-switch d-flex justify-content-center">
-                                                        <input class="form-check-input toggle-status-switch" type="checkbox" name="IsActive"
-                                                               @(item.IsActive ? "checked" : "") onchange="this.form.submit()" />
+                                                        <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                            name="IsActive" @(item.IsActive ? "checked" : "")
+                                                            onchange="this.form.submit()" />
                                                     </div>
                                                 </form>
                                             </td>
@@ -57,10 +61,8 @@
                                                 <a asp-area="Admin" asp-controller="Menu" asp-action="Delete"
                                                     asp-route-id="@item.MenuID" class="btn btn-danger btn-sm"
                                                     title="Delete the menu"><i class="bi bi-trash"></i></a>
-                                                    
+
                                             </td>
-
-
                                         </tr>
                                     }
                                 </tbody>
@@ -71,6 +73,5 @@
             </div>
         </section>
         </p>
-
     </div>
 </main>

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using StudentManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using StudentManagement.Models;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
@@ -59,31 +59,24 @@ namespace StudentManagement.Areas.Admin.Controllers
             var cohort = _context.Cohorts.Find(_class.CohortID);
             if (cohort != null && cohort.StartYear.HasValue && cohort.EndYear.HasValue)
             {
-                var gdList = _context.Grades.OrderBy(k => k.GradeID).ToList();
-                int totalYears = Math.Min(gdList.Count, cohort.EndYear.Value - cohort.StartYear.Value);
-
-                for (int i = 0; i < totalYears; i++)
+                // Tính năm học dựa theo niên khóa
+                var grade = _context.Grades.Find(_class.GradeID);
+                if (grade != null)
                 {
-                    var classNew = new tblClass
-                    {
-                        ClassName = _class.ClassName,
-                        GradeID = gdList[i].GradeID,
-                        NumberOfStudent = _class.NumberOfStudent,
-                        SchoolYear = $"{cohort.StartYear + i}-{cohort.StartYear + i + 1}",
-                        IsActive = _class.IsActive,
-                        CohortID = _class.CohortID
-                    };
-
-                    bool exists = _context.Classes.Any(l =>
-                        l.ClassName == classNew.ClassName &&
-                        l.CohortID == classNew.CohortID &&
-                        l.SchoolYear == classNew.SchoolYear);
-
-                    if (!exists)
-                        _context.Classes.Add(classNew);
+                    int yearOffset = grade.GradeID - 1; // hoặc tùy theo ID thực tế
+                    _class.SchoolYear = $"{cohort.StartYear + yearOffset}-{cohort.StartYear + yearOffset + 1}";
                 }
 
-                _context.SaveChanges();
+                bool exists = _context.Classes.Any(l =>
+                    l.ClassName == _class.ClassName &&
+                    l.CohortID == _class.CohortID &&
+                    l.SchoolYear == _class.SchoolYear);
+
+                if (!exists)
+                {
+                    _context.Classes.Add(_class);
+                    _context.SaveChanges();
+                }
             }
 
             return RedirectToAction("Index");
@@ -160,9 +153,18 @@ namespace StudentManagement.Areas.Admin.Controllers
 
         private void LoadDropdowns(tblClass _class = null)
         {
-            ViewBag.gdList = new SelectList(_context.Grades.OrderBy(k => k.GradeID),
-                "GradeID", "GradeName", _class?.GradeID);
+            // Lấy danh sách khối
+            var grades = _context.Grades
+                .OrderBy(k => k.GradeID)
+                .Select(k => new { k.GradeID, k.GradeName })
+                .ToList();
 
+            // Thêm dòng mặc định ở đầu danh sách
+            grades.Insert(0, new { GradeID = 0, GradeName = "---- Khối ----" });
+
+            ViewBag.gdList = new SelectList(grades, "GradeID", "GradeName", _class?.GradeID);
+
+            // Lấy danh sách khóa học (niên khóa)
             var chList = _context.Cohorts
                 .Where(c => c.IsActive)
                 .Select(c => new { c.CohortID, ThongTin = c.StartYear + "-" + c.EndYear + " - Khóa " + c.CohortName })
@@ -170,6 +172,7 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             ViewBag.chList = new SelectList(chList, "CohortID", "ThongTin", _class?.CohortID);
         }
+
 
         private string ComputeSchoolYear(tblClass _class)
         {

@@ -8,7 +8,6 @@
         <h2>Danh sách chức năng</h2>
 
         <p>
-
         <section class="section dashboard">
             <div class="row">
                 <div class="col-12">
@@ -17,10 +16,12 @@
                             <table class="table table-borderless datatable">
                                 <thead>
                                     <tr>
+                                        <th class="col-1 text-center">STT</th>
                                         <th class="col-1 text-center">Mã lớp</th>
                                         <th class="col-1 text-center">Tên lớp</th>
                                         <th class="col-1 text-center">Mã khối</th>
-                                        <th class="col-1 text-center">Số lượng</th>
+                                        <th class="col-1 text-center">Số lượng tối đa</th>
+                                        <th class="col-1 text-center">Số lượng hiện tại</th>
                                         <th class="col-2 text-center">Năm học</th>
                                         <th class="col-2 text-center">Niên khóa</th>
                                         <th class="col-1 text-center">Hiện thị</th>
@@ -28,9 +29,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @{
+                                        int stt = 0;
+                                    }
                                     @foreach (var item in Model)
                                     {
+                                        stt++;
                                         <tr>
+                                            <td class="text-center" scope="row">@stt</td>
                                             <td class="text-center" scope="row">@item.ClassID</td>
                                             <td class="text-left text-primary text-center" scope="row">
                                                 <a asp-area="Admin" asp-controller="QLLopHoc" asp-action="Details"
@@ -39,15 +45,16 @@
                                                 </a>
                                             </td>
                                             <td class="text-center" scope="row">@item.grade?.GradeName</td>
-                                            <td class="text-center" scope="row">@item.NumberOfStudent</td>
+                                            <td class="text-center" scope="row">@item.MaxStudents</td>
+                                            <td class="text-center" scope="row">@item.CurrentStudents</td>
                                             <td class="text-center" scope="row">@item.SchoolYear</td>
                                             <td class="text-center">
                                                 @(
-                                                    item.cohort != null
-                                                    ? item.cohort.StartYear + " - " + item.cohort.EndYear + " - Khóa " +
-                                                    item.cohort.CohortName
-                                                    : "Chưa có khóa học"
-                                                )
+                                                                                            item.cohort != null
+                                                                                            ? item.cohort.StartYear + " - " + item.cohort.EndYear + " - Khóa " +
+                                                                                            item.cohort.CohortName
+                                                                                            : "Chưa có khóa học"
+                                                                                            )
                                             </td>
 
                                             <td class="text-center">
