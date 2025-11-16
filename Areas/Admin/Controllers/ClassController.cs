@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+//using StudentManagement.Ultilities;
 using StudentManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -59,24 +60,32 @@ namespace StudentManagement.Areas.Admin.Controllers
             var cohort = _context.Cohorts.Find(_class.CohortID);
             if (cohort != null && cohort.StartYear.HasValue && cohort.EndYear.HasValue)
             {
-                // Tính năm học dựa theo niên khóa
-                var grade = _context.Grades.Find(_class.GradeID);
-                if (grade != null)
-                {
-                    int yearOffset = grade.GradeID - 1; // hoặc tùy theo ID thực tế
-                    _class.SchoolYear = $"{cohort.StartYear + yearOffset}-{cohort.StartYear + yearOffset + 1}";
-                }
+                var gdList = _context.Grades.OrderBy(k => k.GradeID).ToList();
+                int totalYears = Math.Min(gdList.Count, cohort.EndYear.Value - cohort.StartYear.Value);
 
-                bool exists = _context.Classes.Any(l =>
-                    l.ClassName == _class.ClassName &&
-                    l.CohortID == _class.CohortID &&
-                    l.SchoolYear == _class.SchoolYear);
-
-                if (!exists)
+                for (int i = 0; i < totalYears; i++)
                 {
-                    _context.Classes.Add(_class);
-                    _context.SaveChanges();
+                    var classNew = new tblClass
+                    {
+                        ClassName = _class.ClassName,
+                        MaxStudents = _class.MaxStudents,
+                        CurrentStudents = 0,
+                        IsActive = _class.IsActive,
+                        CohortID = _class.CohortID,
+                        GradeID = gdList[i].GradeID,
+                        SchoolYear = $"{cohort.StartYear + i}-{cohort.StartYear + i + 1}"
+                    };
+
+                    // Tránh trùng lớp cùng tên + khóa + SchoolYear
+                    bool exists = _context.Classes.Any(l =>
+                        l.ClassName == _class.ClassName &&
+                        l.CohortID == _class.CohortID &&
+                        l.SchoolYear == _class.SchoolYear);
+
+                    if (!exists)
+                        _context.Classes.Add(classNew);
                 }
+                _context.SaveChanges();
             }
 
             return RedirectToAction("Index");
@@ -108,6 +117,7 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             var cohort = _context.Cohorts.Find(_class.CohortID);
 
+            // Chỉ tính SchoolYear nếu chưa có (giữ thủ công nếu đã nhập)
             if (string.IsNullOrEmpty(_class.SchoolYear) && cohort != null && cohort.StartYear.HasValue)
                 _class.SchoolYear = ComputeSchoolYear(_class);
 
@@ -154,23 +164,16 @@ namespace StudentManagement.Areas.Admin.Controllers
         private void LoadDropdowns(tblClass _class = null)
         {
             // Lấy danh sách khối
-            var grades = _context.Grades
-                .OrderBy(k => k.GradeID)
-                .Select(k => new { k.GradeID, k.GradeName })
-                .ToList();
-
-            // Thêm dòng mặc định ở đầu danh sách
-            grades.Insert(0, new { GradeID = 0, GradeName = "---- Khối ----" });
-
-            ViewBag.gdList = new SelectList(grades, "GradeID", "GradeName", _class?.GradeID);
+            ViewBag.gdList = new SelectList(_context.Grades.OrderBy(k => k.GradeID),
+                "GradeID", "GradeName", _class?.GradeID);
 
             // Lấy danh sách khóa học (niên khóa)
             var chList = _context.Cohorts
                 .Where(c => c.IsActive)
-                .Select(c => new { c.CohortID, ThongTin = c.StartYear + "-" + c.EndYear + " - Khóa " + c.CohortName })
+                .Select(c => new { c.CohortID, Info = c.StartYear + "-" + c.EndYear + " - Khóa " + c.CohortName })
                 .ToList();
 
-            ViewBag.chList = new SelectList(chList, "CohortID", "ThongTin", _class?.CohortID);
+            ViewBag.chList = new SelectList(chList, "CohortID", "Info", _class?.CohortID);
         }
 
 
@@ -185,5 +188,141 @@ namespace StudentManagement.Areas.Admin.Controllers
             int startYear = _class.cohort.StartYear.Value + index;
             return $"{startYear}-{startYear + 1}";
         }
+
+        // Thống kê
+    //     public IActionResult ThongKe()
+    //     {
+    //         // Tổng thống kê điểm toàn khối (coi như toàn trường)
+    //         var allGrades = _context.QLDiems.ToList();
+    //         var totalExams = allGrades.Count;
+    //         var sumOfAllScores = allGrades.Sum(d => d.AverageScore);
+    //         var averageScoreAll = totalExams > 0 ? (double)sumOfAllScores / totalExams : 0;
+
+    //         // Thống kê điểm theo từng khối (for dropdown)
+    //         var gradeLevelStats = _context.QLKhois.Select(k => k.GradeName).Distinct().ToList();
+
+    //         // Thống kê điểm trung bình theo từng lớp (for dropdown)
+    //         var classStats = _context.QLLopHocs.Select(l => l.ClassName).Distinct().ToList();
+
+    //         ViewBag.AverageScoreAll = averageScoreAll;
+    //         ViewBag.GradeLevels = gradeLevelStats;
+    //         ViewBag.Classes = classStats;
+    //         ViewBag.TotalExams = totalExams;
+
+
+
+    //         return View();
+    //     }
+
+
+    //     public IActionResult DiemTheoKhoiPartial(string gradeLevelFilter)
+    //     {
+    //         if (string.IsNullOrWhiteSpace(gradeLevelFilter) || gradeLevelFilter == "all")
+    //         {
+    //             return Json(new List<object> { new {
+    //         GradeName = "Toàn trường",
+    //         AverageScore = _context.QLDiems.Average(d => (double?)d.AverageScore) ?? 0
+    //     }});
+    //         }
+
+    //         var gradeAvg = _context.QLDiems
+    //  .Join(_context.QLMonHocs, d => d.SubjectID, m => m.SubjectID, (d, m) => new { d, m })
+    //  .GroupBy(x => x.m.SubjectName) // Nhóm theo tên môn học
+    //  .Select(g => new
+    //  {
+    //      SubjectName = g.Key,
+    //      AverageScore = g.Average(x => x.d.AverageScore)
+    //  })
+    //  .ToList();
+
+    //         return Json(gradeAvg);
+    //     }
+
+    //     public IActionResult DiemTrungBinhTheoLopPartial(string classFilter)
+    //     {
+    //         if (string.IsNullOrWhiteSpace(classFilter) || classFilter == "all")
+    //         {
+    //             return Json(new List<object> { new {
+    //         ClassName = "Tất cả lớp",
+    //         AverageScore = _context.QLDiems.Average(d => (double?)d.AverageScore) ?? 0
+    //     }});
+    //         }
+
+    //         var classAvg = _context.QLDiems
+    //   .Join(_context.QLHocSinhs, d => d.StudentID, hs => hs.StudentID, (d, hs) => new { d, hs })
+    //   .Join(_context.QLHocSinhLopHocs.Where(hsl => hsl.IsActive), x => x.hs.StudentID, hsl => hsl.StudentID, (x, hsl) => new { x.d, hsl })
+    //   .Join(_context.QLLopHocs, x => x.hsl.ClassID, lh => lh.ClassID, (x, lh) => new { x.d, lh })
+    //   .Where(x => x.lh.ClassName == classFilter)
+    //   .GroupBy(x => x.lh.ClassName)
+    //   .Select(g => new
+    //   {
+    //       ClassName = g.Key,
+    //       AverageScore = g.Average(x => x.d.AverageScore)
+    //   })
+    //   .ToList();
+
+    //         return Json(classAvg);
+
+    //     }
+    //     public IActionResult DiemTrungBinhHocSinhPartial(string studentCodeFilter)
+    //     {
+    //         try
+    //         {
+    //             if (string.IsNullOrWhiteSpace(studentCodeFilter))
+    //                 return Content(string.Empty);
+
+    //             var filter = studentCodeFilter.Trim().ToLower();
+
+    //             var studentScores = _context.QLDiems
+    // .Join(_context.QLHocSinhs,
+    //       d => d.StudentID.ToString(),
+    //       hs => hs.StudentID.ToString(),
+    //       (d, hs) => new { d, hs })
+    // .Where(x =>
+    //     x.hs.StudentID.ToString().ToLower().Contains(filter) ||
+    //     x.hs.FullName.ToLower().Contains(filter))
+    // .Join(_context.QLMonHocs,
+    //       x => x.d.SubjectID,
+    //       m => m.SubjectID,
+    //       (x, m) => new { x.hs, x.d, m })
+    // // Join bảng trung gian QLHocSinhLopHoc
+    // .Join(_context.QLHocSinhLopHocs.Where(hsl => hsl.IsActive),
+    //       temp => temp.hs.StudentID,
+    //       hsl => hsl.StudentID,
+    //       (temp, hsl) => new { temp.hs, temp.d, temp.m, hsl })
+    // // Join lớp học
+    // .Join(_context.QLLopHocs,
+    //       temp => temp.hsl.ClassID,
+    //       lop => lop.ClassID,
+    //       (temp, lop) => new
+    //       {
+    //           temp.hs.StudentID,
+    //           temp.hs.FullName,
+    //           temp.m.SubjectName,
+    //           temp.d.AverageScore,
+    //           ClassName = lop.ClassName
+    //       })
+    // .GroupBy(x => new { x.StudentID, x.FullName, x.SubjectName, x.ClassName })
+    // .Select(g => new
+    // {
+    //     StudentCode = g.Key.StudentID.ToString(),
+    //     FullName = g.Key.FullName,
+    //     SubjectName = g.Key.SubjectName,
+    //     ClassName = g.Key.ClassName,
+    //     AverageScore = g.Average(x => x.AverageScore)
+    // })
+    // .ToList();
+
+
+    //             if (!studentScores.Any())
+    //                 return Content(string.Empty);
+
+    //             return Json(studentScores);
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             return Content("Lỗi xử lý controller: " + ex.Message);
+    //         }
+    //     }
     }
 }

@@ -84,7 +84,7 @@ namespace StudentManagement.Areas.Admin.Controllers
             existing.StartYear = ch.StartYear;
             existing.EndYear = ch.EndYear;
 
-            existing.CohortName = 60 + (ch.StartYear - 2024);
+            existing.CohortName = 60 + (ch.StartYear - 2019);
 
             existing.IsActive = ch.IsActive;
 

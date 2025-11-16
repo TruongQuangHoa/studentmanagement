@@ -1,0 +1,373 @@
+@* @model List<StudentManagement.Models.tblStudent>
+@using QRCoder
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var logoPath = Url.Content("/admin/assets/img/logo.jpg");
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách thẻ học sinh</h2>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+        
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+
+                        <form method="get" asp-action="StudentCard" id="filterForm"
+                            class="d-flex flex-wrap align-items-center gap-2 flex-grow-1" autocomplete="off">
+
+                            <label for="classFilterDropdown" class="form-label mb-0 fw-semibold me-1">Lọc theo lớp:</label>
+
+                           <select name="classId" id="classFilterDropdown" class="form-select form-select-sm w-auto"
+                            onchange="this.form.submit()">
+                        <option value="">-- Tất cả các lớp --</option>
+
+                        @if (!string.IsNullOrWhiteSpace(ViewBag.SearchTerm as string))
+                        {
+                            <option value="-1" selected>
+                                -- Chỉ học sinh vừa tìm kiếm --
+                            </option>
+                        }
+                        else
+                        {
+                            @if (ViewBag.ClassList is List<SelectListItem> lopHocList)
+                            {
+                                foreach (var item in lopHocList)
+                                {
+                                    <option value="@item.Value" selected="@(item.Value == (ViewBag.SelectedClassId as string) ? "selected" : null)">
+                                        @item.Text
+                                    </option>
+                                }
+                            }
+                        }
+                    </select>
+
+                            <div class="position-relative" style="width: 350px;">
+                            <input type="text" 
+                                name="searchTerm" 
+                                id="searchInput"
+                                class="form-control form-control-sm pe-5"
+                                placeholder="🔍 Tìm kiếm thông tin theo mã hoặc tên..."
+                                value="@(ViewBag.SearchTerm ?? "")"
+                                autocomplete="off" />
+
+                            <button type="button" id="clearSearch"
+                                    class="btn btn-sm btn-link text-muted position-absolute top-50 end-0 translate-middle-y"
+                                    style="display:@(string.IsNullOrEmpty((string?)ViewBag.SearchTerm) ? "none" : "inline-block");"
+                                    aria-label="Xóa tìm kiếm">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </div>
+
+                        </form>
+                        <a class="btn btn-success btn-sm d-flex align-items-center gap-1"
+                        href="@Url.Action("ExportClassCardsToImages", "QLHocSinh", new {
+                            area = "Admin",
+                            classId = ViewBag.SelectedClassId,
+                            searchTerm = ViewBag.SearchTerm
+                        })"
+                        title="Xuất ảnh thẻ học sinh">
+                            <i class="bi bi-file-earmark-image"></i> Xuất ảnh
+                        </a>
+
+                        <a href="@Url.Action("Index", "QLHocSinh", new { area = "Admin" })"
+                            class="btn btn-secondary btn-sm d-flex align-items-center gap-1"
+                            title="Quay lại danh sách">
+                                <i class="bi bi-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                   
+                    <div class="card-body mt-4">
+    <div class="card-container">
+        @foreach (var student in Model)
+        {
+            // Lấy lớp hiện tại qua bảng trung gian (chỉ lấy lớp active)
+            var currentClass = student.HocSinhLopHocs
+                .FirstOrDefault(hsl => hsl.IsActive)?.lopHoc;
+
+            // Tính toán khóa học từ thông tin lớp
+            string khoaText = "";
+            if (currentClass?.KhoaHoc != null)
+            {
+                var khoaHoc = currentClass.KhoaHoc;
+                khoaText = $"Niên khóa: {khoaHoc.Cohort} ({khoaHoc.StartYear} - {khoaHoc.EndYear})";
+            }
+            else
+            {
+                khoaText = "Niên khóa: Không xác định";
+            }
+
+            // Dữ liệu QR code
+           var qrDataString = 
+                $"Mã học sinh: {student.StudentID}\n" +
+                $"Họ tên: {student.FullName}\n" +
+                $"Ngày sinh: {student.Birth?.ToString("dd/MM/yyyy")}\n" +
+                $"Địa chỉ: {student.Address}\n" +
+                $"Lớp: {currentClass?.ClassName ?? "Không xác định"}\n" +
+                $"Dân tộc: {student.Nation}\n" +
+                $"Tôn giáo: {student.Religion}\n" +
+                $"SĐT: {student.NumberPhone}\n" +
+                $"Tình trạng: {student.StatusStudent}";
+
+            var qrGenerator = new QRCodeGenerator();
+            var qrCodeData = qrGenerator.CreateQrCode(qrDataString, QRCodeGenerator.ECCLevel.Q);
+            var qrCode = new Base64QRCode(qrCodeData).GetGraphic(3);
+
+            <div class="student-card">
+                <div class="card-header-student">
+                    <img src="/admin/assets/img/logo.jpg" class="logo-student" alt="School Logo" />
+                    <div class="title-student">
+                        <div class="school-ministry">BỘ GIÁO DỤC VÀ ĐÀO TẠO</div>
+                        <div class="school-name">TRƯỜNG THPT ANH SƠN I</div>
+                    </div>
+                    <div class="qr-code-student">
+                        <img src="data:image/png;base64,@qrCode" alt="QR Code" />
+                    </div>
+                </div>
+                <div class="card-type-title">THẺ HỌC SINH</div>
+                <div class="card-info-section">
+                    <div class="photo-and-id-container">
+                        <div class="photo-student">
+                            @if (!string.IsNullOrEmpty(student.Images))
+                            {
+                                <img src="@Url.Content("~" + student.Images)" alt="Student Photo" class="student-photo" />
+                            }
+                            else
+                            {
+                                <div class="no-photo-placeholder">Ảnh</div>
+                            }
+                        </div>
+                        <div class="student-id-display">MHS: @student.StudentID</div>
+                    </div>
+                    <div class="student-details">
+                        <div><b>Họ tên:</b> @student.FullName</div>
+                        <div><b>Ngày sinh:</b> @student.Birth?.ToString("dd/MM/yyyy")</div>
+                        <div><b>Lớp:</b> @(currentClass?.ClassName ?? "Không xác định")</div>
+                        <div><b>@khoaText</b></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<style>
+    /* CSS styles giữ nguyên như trước */
+    .main { padding: 20px; }
+    .pagetitle { margin-bottom: 20px; }
+    .pagetitle h2 { font-size: 28px; color: #333; font-weight: 600; }
+    .section.dashboard { margin-top: 20px; }
+    .card.recent-sales { border: none; box-shadow: none; }
+    .card-body { padding: 0; }
+
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .student-card {
+        width: 10.5cm;
+        height: 6.8cm;
+        border: 1.5px solid #0056b3;
+        border-radius: 12px;
+        padding: 10px 15px;
+        font-family: 'Roboto', sans-serif;
+        position: relative;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 50%, #d9edff 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .card-header-student {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-shrink: 0;
+    }
+
+    .logo-student {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .title-student {
+        text-align: center;
+        flex-grow: 1;
+        margin: 0 10px;
+        color: #003366;
+    }
+    .title-student .school-ministry {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .title-student .school-name {
+        font-size: 16px;
+        font-weight: 900;
+        text-transform: uppercase;
+        line-height: 1.2;
+    }
+
+    .qr-code-student img {
+        width: 55px;
+        height: 55px;
+        border: 2px solid #0056b3;
+        padding: 2px;
+        object-fit: contain;
+        background-color: #fff;
+        border-radius: 5px;
+    }
+
+    .card-type-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #004d40;
+        text-align: center;
+        margin-bottom: -5px;
+        padding-top: 5px;
+        border-top: 1px dashed #64b5f6;
+    }
+
+    .card-info-section {
+        display: flex;
+        align-items: flex-start;
+        flex-grow: 1;
+        padding-top: 5px;
+    }
+
+    .photo-and-id-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-right: 25px;
+        flex-shrink: 0;
+    }
+
+    .photo-student {
+        width: 2cm;
+        height: 3cm;
+        border: 1px solid #42a5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background-color: #ffffff;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .student-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+
+    .no-photo-placeholder {
+        font-size: 10px;
+        text-align: center;
+        color: #888;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+    }
+
+    .student-id-display {
+        font-size: 10.5px;
+        font-weight: bold;
+        color: #003366;
+        padding: 4px 0;
+        background-color: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    .student-details {
+        font-size: 14px;
+        color: #333;
+        line-height: 1.7;
+        flex-grow: 1;
+    }
+
+    .student-details div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 3px;
+    }
+
+    .student-details b {
+        min-width: 90px;
+        display: inline-block;
+        color: #1a1a1a;
+        font-weight: 700;
+    }
+
+    @@media print {
+        body { margin: 0; padding: 0; }
+        .main, .pagetitle, .section.dashboard, .card.recent-sales, .card-body {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background-color: transparent !important;
+        }
+        .card-container {
+            gap: 15px;
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding: 5px;
+        }
+        .student-card {
+            margin: 0;
+            box-shadow: none;
+            border: 0.5px solid #a7d9f7;
+            background: #ffffff !important;
+            break-inside: avoid;
+        }
+        .sidebar, .header, .footer, .pagetitle h2 {
+            display: none !important;
+        }
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("searchInput");
+        const clearBtn = document.getElementById("clearSearch");
+
+        if (clearBtn) {
+            clearBtn.addEventListener("click", function () {
+                input.value = "";
+                clearBtn.style.display = "none";
+                input.form.submit();
+            });
+        }
+    });
+</script>
+ *@

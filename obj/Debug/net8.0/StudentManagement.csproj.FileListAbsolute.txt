@@ -15,11 +15,6 @@ D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\StudentManagement.Razo
 D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\StudentManagement.RazorAssemblyInfo.cs
 D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets.build.json
 D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets.development.json
-D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets\msbuild.StudentManagement.Microsoft.AspNetCore.StaticWebAssets.props
-D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets\msbuild.build.StudentManagement.props
-D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.StudentManagement.props
-D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.StudentManagement.props
-D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets.pack.json
 D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\scopedcss\bundle\StudentManagement.styles.css
 D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\scopedcss\projectbundle\StudentManagement.bundle.scp.css
@@ -258,3 +253,11 @@ D:\Workspace\ASPdotNET\StudentManagement\bin\Debug\net8.0\tr\Microsoft.CodeAnaly
 D:\Workspace\ASPdotNET\StudentManagement\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\Workspace\ASPdotNET\StudentManagement\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
 D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\StudentManagement.sourcelink.json
+D:\Workspace\ASPdotNET\StudentManagement\bin\Debug\net8.0\StudentManagement.staticwebassets.endpoints.json
+D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\rpswa.dswa.cache.json
+D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\rjimswa.dswa.cache.json
+D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets.build.json.cache
+D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+D:\Workspace\ASPdotNET\StudentManagement\obj\Debug\net8.0\swae.build.ex.cache

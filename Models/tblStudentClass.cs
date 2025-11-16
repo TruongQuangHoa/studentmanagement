@@ -21,6 +21,10 @@ namespace StudentManagement.Models
         [ForeignKey(nameof(StudentID))]
         public tblStudent? student { get; set; }
 
+        public int? YearSemesterID { get; set; }
+        [ForeignKey(nameof(YearSemesterID))]
+        public tblYearSemester? yearsemester { get; set; }
+
         public int? CohortID { get; set; }
         [ForeignKey(nameof(CohortID))]
         public tblCohort? cohort { get; set; }

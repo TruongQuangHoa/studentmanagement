@@ -29,5 +29,8 @@ namespace StudentManagement.Models
         public string? Nationality { get; set; }
 
         public virtual ICollection<tblStudentClass>? studentclass { get; set; }
+        // public virtual ICollection<QLThanNhan> ThanNhans { get; set; } = new List<QLThanNhan>();
+        // public virtual ICollection<QLHosohoa> Hosohoas { get; set; } = new List<QLHosohoa>();
+
     }
 }

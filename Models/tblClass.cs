@@ -28,7 +28,11 @@ namespace StudentManagement.Models
         [ForeignKey("CohortID")]
         public virtual tblCohort? cohort { get; set; }
         
-        [JsonIgnore]
+        // Quan hệ ngược tới học sinh-lớp
+        [JsonIgnore] // tránh vòng lặp khi serialize
         public virtual ICollection<tblStudentClass>? studentclass { get; set; }
+
+        // [JsonIgnore] // tránh vòng lặp nếu bạn không cần ngược lại từ lớp → thời khóa biểu
+        // public virtual ICollection<QLKhoaBieu>? KhoaBieus { get; set; }
     }
 }

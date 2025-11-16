@@ -17,6 +17,11 @@ namespace StudentManagement.Models
         public DbSet<AdminMenu> AdminMenus { get; set; }
         public DbSet<tblCohort> Cohorts { get; set; }
         public DbSet<tblGrade> Grades { get; set; }
+        public DbSet<tblYearSemester> YearSemesters { get; set; }
+        public DbSet<tblDepartment> Departments { get; set; }
+        public DbSet<tblSubject> Subjects { get; set; }
+        public DbSet<tblTeacher> Teachers { get; set; }
+        public DbSet<tblTeacherSubject> TeacherSubjects { get; set; }
         public DbSet<tblClass> Classes { get; set; }
         public DbSet<tblStudent> Students { get; set; }
         public DbSet<tblStudentClass> StudentClasses { get; set; }
@@ -33,6 +38,27 @@ namespace StudentManagement.Models
             .WithMany(x => x.studentclass)
             .HasForeignKey(x => x.StudentID)      // tên cột trong tblStudentClass
             .HasPrincipalKey(x => x.StudentID);   // tên khóa chính trong tblStudent
+
+            // Quan hệ tblTeacherSubject -> tblTeacher
+            modelBuilder.Entity<tblTeacherSubject>()
+                    .HasKey(x => new { x.TeacherID, x.SubjectID });
+
+            // Quan hệ tblTeacherSubject -> tblTeacher (N-1)
+            modelBuilder.Entity<tblTeacherSubject>()
+                .HasOne(x => x.teacher)
+                .WithMany(x => x.teachersubject)
+                .HasForeignKey(x => x.TeacherID)
+                .HasPrincipalKey(x => x.TeacherID);
+            
+            // Quan hệ tblTeacherSubject -> tblSubject (N-1)
+            modelBuilder.Entity<tblTeacherSubject>()
+                .HasOne(x => x.subject)
+                .WithMany(x => x.teacherSubject)
+                .HasForeignKey(x => x.SubjectID)
+                .HasPrincipalKey(x => x.SubjectID);
+
+            // Gọi 1 lần duy nhất
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

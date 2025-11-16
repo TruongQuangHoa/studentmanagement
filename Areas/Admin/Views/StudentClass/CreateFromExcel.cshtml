@@ -1,0 +1,42 @@
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Thêm học sinh từ Excel";
+}
+
+<main id="main" class="main">
+    <div class="card-header">
+        <h5>Thêm học sinh vào lớp từ Excel</h5>
+    </div>
+    <div class="card-body">
+
+        @if (!string.IsNullOrEmpty(ViewBag.Message))
+        {
+            <div class="alert alert-success">@ViewBag.Message</div>
+        }
+
+        <form asp-action="CreateFromExcel" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="classId" class="form-label fw-bold">Chọn lớp:</label>
+                <select id="classId" name="classId" class="form-select" required>
+                    <option value="">-- Chọn lớp --</option>
+                    @if (ViewBag.ClassList != null)
+                    {
+                        foreach (var cls in ViewBag.ClassList as SelectList)
+                        {
+                            <option value="@cls.Value">@cls.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="file" class="form-label fw-bold">Chọn file Excel (.xlsx):</label>
+                <input type="file" id="file" name="file" class="form-control" accept=".xlsx" required />
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-upload me-2"></i>Upload và thêm học sinh
+            </button>
+        </form>
+    </div>
+</div>

@@ -11,23 +11,26 @@
             <div class="form-row row">
                 <div class="col-md-6 mb-3">
                     <label>Mã học sinh</label>
-                    <input type="text" class="form-control" asp-for="StudentID" placeholder="Nhập mã học sinh ...">
+                    <input type="text" class="form-control" asp-for="StudentID" placeholder="Nhập mã học sinh ..."
+                        required>
                     <span asp-validation-for="StudentID" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Họ và tên</label>
-                    <input type="text" class="form-control" asp-for="FullName" placeholder="Nhập họ và tên ...">
+                    <input type="text" class="form-control" asp-for="FullName" placeholder="Nhập họ và tên ..."
+                        required>
+                    <span asp-validation-for="FullName" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Ngày sinh</label>
-                    <input type="date" class="form-control" asp-for="Birth">
+                    <input type="date" class="form-control" asp-for="Birth" required>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Giới tính</label>
-                    <select asp-for="Gender" class="form-select">
+                    <select asp-for="Gender" class="form-select" required>
                         <option value="Nam">Nam</option>
                         <option value="Nữ">Nữ</option>
                         <option value="Khác">Khác</option>
@@ -37,27 +40,27 @@
                 <div class="col-md-6 mb-3">
                     <label>Tỉnh/Thành phố</label>
                     <input id="provinceInput" class="form-control" name="Province" value="@Model?.Province"
-                           placeholder="Nhập hoặc chọn tỉnh/thành phố" autocomplete="off" />
+                        placeholder="Nhập hoặc chọn tỉnh/thành phố" autocomplete="off" required />
                     <select id="provinceSelect" size="5" class="form-select mt-1" style="display:none;"></select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Xã/Phường</label>
                     <input id="wardInput" class="form-control" name="Commune" value="@Model?.Commune"
-                           placeholder="Nhập hoặc chọn xã/phường" autocomplete="off" />
+                        placeholder="Nhập hoặc chọn xã/phường" autocomplete="off" required />
                     <select id="wardSelect" size="5" class="form-select mt-1" style="display:none;"></select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Nhập xóm</label>
                     <input type="text" class="form-control" id="hamletInput" name="Hamlet" value="@Model?.Hamlet"
-                           placeholder="Nhập xóm...">
+                        placeholder="Nhập xóm..." required>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Quốc tịch</label>
                     <input id="quocTich" class="form-control" name="Nationality"
-                           value="@(Model?.Nationality ?? "Việt Nam")" placeholder="Việt Nam" />
+                        value="@(Model?.Nationality ?? "Việt Nam")" placeholder="Việt Nam" required />
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -67,7 +70,8 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Dân tộc</label>
-                    <input type="text" class="form-control" asp-for="Nation" placeholder="Nhập dân tộc...">
+                    <input type="text" class="form-control" asp-for="Nation" placeholder="Nhập dân tộc..." required>
+                    <span asp-validation-for="Nation" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -91,7 +95,8 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Số điện thoại</label>
-                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại...">
+                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..." required>
+                    <span asp-validation-for="NumberPhone" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -106,17 +111,17 @@
                 <div class="form-group col-md-6 mb-3">
                     <label>
                         @Html.CheckBox("IsActive", false)
-                        Hiện thị
+                        Hiển thị
                     </label>
                 </div>
             </div>
-            <a asp-controller="QLHocSinh" asp-action="Index" class="btn btn-lg btn-warning p-2">
+            <a asp-controller="Student" asp-action="Index" class="btn btn-lg btn-warning p-2">
                 <i class="bi bi-arrow-left-circle"></i>
-                Thoát ra
+                Quay lại
             </a>
 
             <button type="submit" value="Create" class="btn btn-lg btn-primary p-2" asp-action="Create"
-                    onclick="return checkValue()">Lưu thông tin</button>
+                onclick="return checkValue()">Lưu thông tin</button>
 
         </form>
     </div>
