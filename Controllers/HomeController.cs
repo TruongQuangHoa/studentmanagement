@@ -20,16 +20,16 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        // SỬA LỖI: Truy cập DbSet trực tiếp qua thuộc tính tblPost
-        var featuredPosts = await _context.tblPost // <--- ĐÃ SỬA TỪ GettblPost() sang tblPost
+        
+        var featuredPosts = await _context.tblPost 
                                          .Where(p => p.IsActive == true && p.IsFeatured == true)
                                          .OrderBy(p => p.PostOrder)
                                          .ToListAsync();
 
-        // Dữ liệu hỗ trợ tĩnh 
+        
         var supportContacts = new List<SupportContact>(); 
         
-        // Khởi tạo ViewModel
+        
         var viewModel = new HomeDashboardVM
         {
             FullName = "Nguyễn Bảo Long", 

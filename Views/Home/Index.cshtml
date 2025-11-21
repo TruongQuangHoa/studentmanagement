@@ -61,18 +61,14 @@
                                                 <div class="carousel-item @activeClass">
                                                     <img src="@imageUrlPath" class="d-block w-100 rounded" alt="@post.Title" style="height: 350px; object-fit: cover;">
                                                     
-                                                    @* --- SỬA TẠI ĐÂY --- *@
-                                                    @* 1. Bỏ bg-dark bg-opacity-75 rounded p-2 (để mất khung đen) *@
+                                            
                                                     <div class="carousel-caption d-none d-md-block pb-4">
                                                         
-                                                        @* 2. Bỏ thẻ h5 (Tiêu đề) và p (Mô tả) *@
                                                         
-                                                        @* 3. Chỉ giữ lại nút Xem chi tiết *@
-                                                        @* Tôi đổi btn-light thành btn-primary (màu xanh) hoặc btn-dark (màu đen) để nó nổi bật hơn trên nền ảnh *@
                                                         <a asp-controller="Post" asp-action="Details" asp-route-id="@post.PostID" class="btn btn-primary">Xem chi tiết</a>
                                                     
                                                     </div>
-                                                    @* --- HẾT PHẦN SỬA --- *@
+                                                   
 
                                                 </div>
                                                 slideIndex++;
@@ -80,7 +76,7 @@
                                         }
                                         else
                                         {
-                                            // Slide mặc định khi không có tin tức (đã bỏ slide Dã ngoại)
+                                           
                                             <div class="carousel-item active">
                                                 <img src="https://placehold.co/800x400/AAAAAA/FFFFFF?text=Welcome+to+Student+Management" class="d-block w-100 rounded" alt="Chào mừng" style="height: 350px; object-fit: cover;">
                                                 <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-2">
