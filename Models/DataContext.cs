@@ -21,6 +21,8 @@ namespace StudentManagement.Models
         public DbSet<tblStudent> Students { get; set; }
         public DbSet<tblStudentClass> StudentClasses { get; set; }
 
+        public DbSet<tblPost> tblPost { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Cấu hình khóa phụ duy nhất cho StudentID trong tblStudent
