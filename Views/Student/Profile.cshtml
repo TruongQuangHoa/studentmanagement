@@ -1,125 +1,317 @@
 @model StudentManagement.Models.tblStudent
 
-<!DOCTYPE html>
-<html lang="en">
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Hồ Sơ Học Sinh";
+}
 
-<body>
+<main id="main" class="main">
 
-<link rel="stylesheet" href="~/assets/css/student-profile.css" />
-<script src="~/assets/js/student-profile.js"></script>
-
-<div class="student-profile">
-<div class="app-container">
-    <!-- Thanh menu bên trái -->
-    <nav class="sidebar">
-        <ul>
-            <li>Trang chủ</li>
-            <li>Học sinh</li>
-            <li>Lớp học</li>
-            <li>Điểm số</li>
-            <li>Cài đặt</li>
-        </ul>
-    </nav>
-
-    <!-- Nội dung bên phải -->
-    <main class="main-content">
-        <div class="student-profile">
-            <!-- Header -->
-            <div class="profile-header">
-                <img src="@Model.Images" onerror="this.src='/assets/images/default-avatar.png'" class="avatar" />
-
-                <div class="info-main">
-                    <h2>@Model.FullName</h2>
-                    <p class="student-id">Mã học sinh: @Model.StudentID</p>
-
-                    <span class="status @(Model.StatusStudent == "Đang học" ? "active" : "inactive")">
-                        @Model.StatusStudent
-                    </span>
+    <section class="section profile">
+        <div class="row">
+            <!-- Profile Photo Column -->
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+                        <img src="@(string.IsNullOrEmpty(Model.Images) ? "/assets/img/images_user.png" : Model.Images)" 
+                             alt="Profile" class="rounded-circle" 
+                             onerror="this.src='/assets/images/default-avatar.png'">
+                        <h2>@Model.FullName</h2>
+                        <h3 class="text-muted">@Model.StudentID</h3>
+                        <div class="mt-2">
+                            <span class="badge @(Model.StatusStudent == "Đang học" ? "bg-success" : "bg-secondary")">
+                                @Model.StatusStudent
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Body -->
-            <div class="profile-body">
-                <h3>Thông tin cá nhân</h3>
-                <div class="info-grid">
+            <!-- Information Column -->
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-body pt-3">
+                        <!-- Tabs with blue background -->
+                        <div class="tab-header" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px 8px 0 0;">
+                            <ul class="nav nav-tabs nav-tabs-bordered" style="border-bottom: none;">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview" style="background-color: #bbdefb; border: 1px solid #90caf9;">
+                                        Thông tin tổng quan
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit" style="background-color: #bbdefb; border: 1px solid #90caf9;">
+                                        Chỉnh sửa thông tin
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
 
-                    <div class="item">
-                        <label>Họ và tên</label>
-                        <span>@Model.FullName</span>
+                        <div class="tab-content pt-4">
+                            <!-- Overview Tab -->
+                            <div class="tab-pane fade show active" id="profile-overview">
+                                <!-- Section 1: Basic Info (4 fields in line with photo) -->
+                                <div class="section-card" style="background-color: #e8f5e9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                    <h5 class="card-title" style="color: #2e7d32; margin-bottom: 15px;">
+                                        <span style="background: #4caf50; color: white; padding: 5px 10px; border-radius: 50%; margin-right: 10px;">1</span>
+                                        Thông tin cá nhân
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-lg-3 col-md-6 info-field">
+                                            <label class="field-label">Mã học sinh</label>
+                                            <div class="field-value" style="background-color: #f1f8e9;">@Model.StudentID</div>
+                                        </div>
+                                        <div class="col-lg-3 col-md-6 info-field">
+                                            <label class="field-label">Họ và tên</label>
+                                            <div class="field-value" style="background-color: #f1f8e9;">@Model.FullName</div>
+                                        </div>
+                                        <div class="col-lg-3 col-md-6 info-field">
+                                            <label class="field-label">Ngày sinh</label>
+                                            <div class="field-value" style="background-color: #f1f8e9;">@(Model.Birth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</div>
+                                        </div>
+                                        <div class="col-lg-3 col-md-6 info-field">
+                                            <label class="field-label">Giới tính</label>
+                                            <div class="field-value" style="background-color: #f1f8e9;">@Model.Gender</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Remaining fields in grid layout -->
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Số điện thoại</label>
+                                        <div class="field-value">@(string.IsNullOrEmpty(Model.NumberPhone) ? "Chưa cập nhật" : Model.NumberPhone)</div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Dân tộc</label>
+                                        <div class="field-value">@Model.Nation</div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Tôn giáo</label>
+                                        <div class="field-value">@Model.Religion</div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Xóm/Thôn</label>
+                                        <div class="field-value">@Model.Hamlet</div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Xã/Phường</label>
+                                        <div class="field-value">@Model.Commune</div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Tỉnh/Thành phố</label>
+                                        <div class="field-value">@Model.Province</div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Quốc tịch</label>
+                                        <div class="field-value">@Model.Nationality</div>
+                                    </div>
+
+                                    <div class="col-12 info-field">
+                                        <label class="field-label">Địa chỉ đầy đủ</label>
+                                        <div class="field-value">@Model.Address</div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Trạng thái học</label>
+                                        <div class="field-value">
+                                            <span class="badge @(Model.StatusStudent == "Đang học" ? "bg-success" : "bg-secondary")">
+                                                @Model.StatusStudent
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 info-field">
+                                        <label class="field-label">Hiển thị</label>
+                                        <div class="field-value">
+                                            <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary")">
+                                                @(Model.IsActive ? "Có" : "Không")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Additional sections with light blue background -->
+                                <div class="additional-sections">
+                                    <div class="section-card" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                                        <h6 style="color: #1976d2; margin: 0;">
+                                            <span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 50%; margin-right: 8px;">2</span>
+                                            Quan hệ thân nhân
+                                        </h6>
+                                    </div>
+
+                                    <div class="section-card" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                                        <h6 style="color: #1976d2; margin: 0;">
+                                            <span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 50%; margin-right: 8px;">3</span>
+                                            Đối tượng đào tạo
+                                        </h6>
+                                    </div>
+
+                                    <div class="section-card" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                                        <h6 style="color: #1976d2; margin: 0;">
+                                            <span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 50%; margin-right: 8px;">4</span>
+                                            Thông tin Đảng/Đoàn/Quân Ngũ
+                                        </h6>
+                                    </div>
+
+                                    <div class="section-card" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                                        <h6 style="color: #1976d2; margin: 0;">
+                                            <span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 50%; margin-right: 8px;">5</span>
+                                            Thông tin tài khoản NH/Bảo hiểm
+                                        </h6>
+                                    </div>
+
+                                    <div class="section-card" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                                        <h6 style="color: #1976d2; margin: 0;">
+                                            <span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 50%; margin-right: 8px;">6</span>
+                                            Quá trình học tập
+                                        </h6>
+                                    </div>
+
+                                    <div class="section-card" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                                        <h6 style="color: #1976d2; margin: 0;">
+                                            <span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 50%; margin-right: 8px;">7</span>
+                                            Liên hệ
+                                        </h6>
+                                    </div>
+
+                                    <div class="section-card" style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                                        <h6 style="color: #1976d2; margin: 0;">
+                                            <span style="background: #2196f3; color: white; padding: 3px 8px; border-radius: 50%; margin-right: 8px;">8</span>
+                                            Hồ sơ số hóa
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Edit Tab -->
+                            <div class="tab-pane fade" id="profile-edit">
+                                <h5 class="card-title">Chỉnh sửa thông tin</h5>
+                                <p class="text-muted">Tính năng đang được phát triển...</p>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="item">
-                        <label>Ngày sinh</label>
-                        <span>@String.Format("{0:dd/MM/yyyy}", Model.Birth)</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Giới tính</label>
-                        <span>@Model.Gender</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Số điện thoại</label>
-                        <span>@Model.NumberPhone</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Dân tộc</label>
-                        <span>@Model.Nation</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Tôn giáo</label>
-                        <span>@Model.Religion</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Xóm</label>
-                        <span>@Model.Hamlet</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Xã/Phường</label>
-                        <span>@Model.Commune</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Tỉnh/Thành phố</label>
-                        <span>@Model.Province</span>
-                    </div>
-
-                    <div class="item full">
-                        <label>Địa chỉ đầy đủ</label>
-                        <span>@Model.Address</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Quốc tịch</label>
-                        <span>@Model.Nationality</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Trạng thái học</label>
-                        <span>@Model.StatusStudent</span>
-                    </div>
-
-                    <div class="item">
-                        <label>Hiển thị</label>
-                        <span>@(Model.IsActive ? "Có" : "Không")</span>
-                    </div>
-
-                    <div class="item full">
-                        <label>Hình ảnh</label>
-                        <img src="@Model.Images" onerror="this.src='/assets/images/default-avatar.png'" class="avatar" />
-                    </div>
-
                 </div>
             </div>
         </div>
-    </main>
-</div>
-</div>
+    </section>
+</main>
 
-</body>
+<style>
+    .info-field {
+        padding: 15px 0;
+        border-bottom: 1px solid #ebeef4;
+    }
 
-</html>
+    .info-field:last-child {
+        border-bottom: none;
+    }
+
+    .field-label {
+        color: #012970;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: block;
+    }
+
+    .field-value {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px 12px;
+        background-color: #f8f9fa;
+        color: #444444;
+        font-size: 0.95rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    .field-value .badge {
+        font-size: 0.8rem;
+    }
+
+    .nav-tabs-bordered {
+        border-bottom: 2px solid #ebeef4;
+    }
+
+    .nav-tabs-bordered .nav-link {
+        margin-bottom: -2px;
+        border: none;
+        color: #2c384e;
+    }
+
+    .nav-tabs-bordered .nav-link.active {
+        background-color: #fff;
+        color: #4154f1;
+        border-bottom: 2px solid #4154f1;
+    }
+
+    .profile-card img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border: 5px solid #fff;
+        box-shadow: 0 0 20px rgba(1, 41, 112, 0.1);
+    }
+
+    /* Hover effect for fields */
+    .field-value:hover {
+        background-color: #e9ecef;
+        border-color: #4154f1;
+        transition: all 0.3s ease;
+    }
+
+    /* Additional sections styling */
+    .additional-sections .section-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .additional-sections .section-card:hover {
+        background-color: #bbdefb !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .tab-header {
+        margin-bottom: 20px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Xử lý lỗi ảnh
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    this.src = '/assets/images/default-avatar.png';
+                });
+            });
+
+            // Tab functionality
+            const triggerTabList = document.querySelectorAll('.nav-tabs-bordered .nav-link');
+            triggerTabList.forEach(triggerEl => {
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const tabTrigger = new bootstrap.Tab(this);
+                    tabTrigger.show();
+                });
+            });
+
+            // Add click handlers for additional sections
+            document.querySelectorAll('.additional-sections .section-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    alert('Tính năng ' + this.querySelector('h6').textContent + ' đang được phát triển...');
+                });
+            });
+        });
+    </script>
+}

@@ -1,48 +1,42 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const img = document.querySelector(".avatar");
+// Student Profile JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle image errors
+    const handleImageError = (img) => {
+        img.src = '/assets/images/default-avatar.png';
+        img.alt = 'Avatar mặc định';
+    };
 
-    img.addEventListener("click", () => {
-        const clone = img.cloneNode();
-        clone.style.maxWidth = "400px";
-        clone.style.borderRadius = "12px";
-
-        const overlay = document.createElement("div");
-        overlay.style.position = "fixed";
-        overlay.style.top = 0;
-        overlay.style.left = 0;
-        overlay.style.right = 0;
-        overlay.style.bottom = 0;
-        overlay.style.background = "rgba(0,0,0,0.7)";
-        overlay.style.display = "flex";
-        overlay.style.alignItems = "center";
-        overlay.style.justifyContent = "center";
-        overlay.style.cursor = "zoom-out";
-        overlay.appendChild(clone);
-
-        document.body.appendChild(overlay);
-
-        overlay.onclick = () => overlay.remove();
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    // Xử lý fallback ảnh avatar nếu load thất bại
-    const avatars = document.querySelectorAll('.student-profile .avatar');
-    avatars.forEach(img => {
-        img.onerror = function() {
-            this.src = '/assets/images/default-avatar.png';
-        };
+    // Attach error handlers to all profile images
+    const profileImages = document.querySelectorAll('.profile-card img');
+    profileImages.forEach(img => {
+        img.addEventListener('error', () => handleImageError(img));
     });
 
-    // Ví dụ: hover highlight item
-    const items = document.querySelectorAll('.info-grid .item');
-    items.forEach(item => {
-        item.addEventListener('mouseenter', () => {
-            item.style.backgroundColor = '#eef5ff';
-        });
-        item.addEventListener('mouseleave', () => {
-            item.style.backgroundColor = '#f9f9f9';
+    // Tab functionality
+    const triggerTabList = document.querySelectorAll('#myTab button');
+    triggerTabList.forEach(triggerEl => {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+        triggerEl.addEventListener('click', event => {
+            event.preventDefault();
+            tabTrigger.show();
         });
     });
-});
 
+    // Print profile functionality
+    const printProfile = () => {
+        window.print();
+    };
+
+    // Export functionality
+    const exportProfile = () => {
+        // Implementation for exporting profile data
+        console.log('Exporting profile data...');
+    };
+
+    // Attach event listeners if buttons exist
+    const printBtn = document.getElementById('printProfile');
+    const exportBtn = document.getElementById('exportProfile');
+    
+    if (printBtn) printBtn.addEventListener('click', printProfile);
+    if (exportBtn) exportBtn.addEventListener('click', exportProfile);
+});
