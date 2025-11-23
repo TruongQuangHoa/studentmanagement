@@ -1,0 +1,125 @@
+@model StudentManagement.Models.tblStudent
+
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+
+<link rel="stylesheet" href="~/assets/css/student-profile.css" />
+<script src="~/assets/js/student-profile.js"></script>
+
+<div class="student-profile">
+<div class="app-container">
+    <!-- Thanh menu bên trái -->
+    <nav class="sidebar">
+        <ul>
+            <li>Trang chủ</li>
+            <li>Học sinh</li>
+            <li>Lớp học</li>
+            <li>Điểm số</li>
+            <li>Cài đặt</li>
+        </ul>
+    </nav>
+
+    <!-- Nội dung bên phải -->
+    <main class="main-content">
+        <div class="student-profile">
+            <!-- Header -->
+            <div class="profile-header">
+                <img src="@Model.Images" onerror="this.src='/assets/images/default-avatar.png'" class="avatar" />
+
+                <div class="info-main">
+                    <h2>@Model.FullName</h2>
+                    <p class="student-id">Mã học sinh: @Model.StudentID</p>
+
+                    <span class="status @(Model.StatusStudent == "Đang học" ? "active" : "inactive")">
+                        @Model.StatusStudent
+                    </span>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="profile-body">
+                <h3>Thông tin cá nhân</h3>
+                <div class="info-grid">
+
+                    <div class="item">
+                        <label>Họ và tên</label>
+                        <span>@Model.FullName</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Ngày sinh</label>
+                        <span>@String.Format("{0:dd/MM/yyyy}", Model.Birth)</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Giới tính</label>
+                        <span>@Model.Gender</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Số điện thoại</label>
+                        <span>@Model.NumberPhone</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Dân tộc</label>
+                        <span>@Model.Nation</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Tôn giáo</label>
+                        <span>@Model.Religion</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Xóm</label>
+                        <span>@Model.Hamlet</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Xã/Phường</label>
+                        <span>@Model.Commune</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Tỉnh/Thành phố</label>
+                        <span>@Model.Province</span>
+                    </div>
+
+                    <div class="item full">
+                        <label>Địa chỉ đầy đủ</label>
+                        <span>@Model.Address</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Quốc tịch</label>
+                        <span>@Model.Nationality</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Trạng thái học</label>
+                        <span>@Model.StatusStudent</span>
+                    </div>
+
+                    <div class="item">
+                        <label>Hiển thị</label>
+                        <span>@(Model.IsActive ? "Có" : "Không")</span>
+                    </div>
+
+                    <div class="item full">
+                        <label>Hình ảnh</label>
+                        <img src="@Model.Images" onerror="this.src='/assets/images/default-avatar.png'" class="avatar" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</div>
+
+</body>
+
+</html>
