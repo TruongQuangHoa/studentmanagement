@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using StudentManagement.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace StudentManagement.Models
 {
@@ -14,12 +15,24 @@ namespace StudentManagement.Models
     {
         [Key]
         public int ClassID { get; set; }
+
+        [Required(ErrorMessage = "Tên lớp không được để trống")]
         public string ClassName { get; set; }
+
+        [BindNever]  // không bind từ form
         public int GradeID { get; set; }
+
+        [Required(ErrorMessage = "Số lượng tối đa không được để trống")]
         public int MaxStudents { get; set; }
+
+        [BindNever]
         public int CurrentStudents { get; set; }
-        public string SchoolYear { get; set; }
+
+        [BindNever]
+        public string SchoolYear { get; set; } = string.Empty;
+
         public bool IsActive { get; set; }
+
         public int? CohortID { get; set; }
 
         [ForeignKey("GradeID")]

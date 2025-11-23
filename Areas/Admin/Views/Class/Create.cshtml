@@ -2,69 +2,45 @@
 @{
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
+
 <main id="main" class="main">
     <div class="pagetitle">
         <h2>Thêm lớp học mới</h2>
     </div>
+
     <div class="container shadow p-5">
-        <form method="Post" asp-action="Create">
-            <div class="form-row row">
+        <form asp-area="Admin" asp-controller="Class" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row">
                 <div class="col-md-6 mb-3">
-                    <lable>Tên lớp</lable>
-                    <input type="text" class="form-control" asp-for="ClassName" placeholder="Tên lớp...">
-                    <span asp-validation-for="ClassName" class="alert-danger"></span>
+                    <label>Tên lớp<span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" asp-for="ClassName" placeholder="Tên lớp..." required />
+                    <span asp-validation-for="ClassName" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label>Mã khối</label>
-                    <select asp-for="GradeID" class="form-control"
-                        asp-items="@(new SelectList(ViewBag.gdList, "Value", "Text"))">
+                    <label>Khóa học<span class="text-danger">*</span></label>
+                    <select asp-for="CohortID" class="form-control" asp-items="ViewBag.chList">
+                        <option value="">--- Chọn Khóa ---</option>
                     </select>
-                    <span asp-validation-for="GradeID" class="alert-danger"></span>
+                    <span asp-validation-for="CohortID" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label>Số lượng tối đa</label>
-                    <input type="text" class="form-control" asp-for="MaxStudents" placeholder="Nhập số lượng tối da...">
-                    <span asp-validation-for="MaxStudents" class="alert-danger"></span>
+                    <label>Số lượng tối đa<span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" asp-for="MaxStudents" placeholder="Số lượng tối đa..." required />
+                    <span asp-validation-for="MaxStudents" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label>Số lượng hiện tại</label>
-                    <input type="text" class="form-control" asp-for="CurrentStudents"
-                        placeholder="Nhập số lượng hiện tại...">
-                    <span asp-validation-for="CurrentStudents" class="alert-danger"></span>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>Năm học</label>
-                    <input type="text" class="form-control" asp-for="SchoolYear" placeholder="Nhập năm học...">
-                    <span asp-validation-for="SchoolYear" class="alert-danger"></span>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>Mã Khóa<span class="text-danger">*</span></label>
-                    <select asp-for="CohortID" class="form-control" asp-items="ViewBag.chList" required>
-                        <option value="">--- Khóa ---</option>
-                    </select>
-                    <span asp-validation-for="CohortID" class="alert-danger"></span>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>
-                        @Html.CheckBox("IsActive", false)
-                        Hiển thị
-                    </label>
+                <div class="col-md-6 mb-3 form-check mt-4">
+                    <input type="checkbox" class="form-check-input" asp-for="IsActive" />
+                    <label class="form-check-label">Hiển thị</label>
                 </div>
             </div>
-            <a asp-controller="Class" asp-action="Index" class="btn btn-lg btn-warning p-2">
-                <i class="bi bi-arrow-left-circle"></i>
-                Quay lại
-            </a>
 
-            <button type="submit" class="btn btn-lg btn-primary p-2">
-                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
-            </button>
+            <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+            <a asp-area="Admin" asp-controller="Class" asp-action="Index" class="btn btn-warning">Quay lại</a>
         </form>
     </div>
 </main>

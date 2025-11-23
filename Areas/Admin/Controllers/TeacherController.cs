@@ -51,7 +51,7 @@ namespace StudentManagement.Areas.Admin.Controllers
         public IActionResult Create()
         {
             getData();
-            ViewBag.SelectedSubjects = new List<int>();
+            ViewBag.SelectedSubjects = new List<int>(); // chưa có môn học nào
             return View();
         }
 

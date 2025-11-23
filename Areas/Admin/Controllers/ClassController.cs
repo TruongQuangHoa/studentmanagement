@@ -1,14 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-//using StudentManagement.Ultilities;
-using StudentManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using StudentManagement.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
@@ -21,172 +17,171 @@ namespace StudentManagement.Areas.Admin.Controllers
         {
             _context = context;
         }
+
+        // GET: Index
         public IActionResult Index()
         {
-            // ViewBag.IsAdmin = Functions.IsAdmin(HttpContext);
-            // ViewBag.IsTeacher = Functions.IsTeacher(HttpContext);
-
-            var clList = _context.Classes
-                .Include(l => l.grade)
-                .Include(l => l.cohort)
-                .OrderBy(l => l.ClassID)
-                .ToList()
-                .Select(l =>
-                {
-                    if (string.IsNullOrEmpty(l.SchoolYear) && l.cohort != null)
-                        l.SchoolYear = ComputeSchoolYear(l);
-                    return l;
-                })
+            var classList = _context.Classes
+                .OrderBy(c => c.GradeID)
+                .ThenBy(c => c.ClassID)
                 .ToList();
 
-            return View(clList);
+            foreach (var cls in classList)
+            {
+                cls.grade = _context.Grades.FirstOrDefault(g => g.GradeID == cls.GradeID);
+                cls.cohort = _context.Cohorts.FirstOrDefault(c => c.CohortID == cls.CohortID);
+            }
+
+            return View(classList);
         }
 
+        // GET: Create
         public IActionResult Create()
         {
             LoadDropdowns();
             return View();
         }
 
+        // POST: Create
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(tblClass _class)
         {
             if (!ModelState.IsValid)
             {
-                LoadDropdowns(_class);
+                LoadDropdowns();
                 return View(_class);
             }
 
-            var cohort = _context.Cohorts.Find(_class.CohortID);
-            if (cohort != null && cohort.StartYear.HasValue && cohort.EndYear.HasValue)
+            var cohort = _context.Cohorts.FirstOrDefault(c => c.CohortID == _class.CohortID);
+            if (cohort == null)
             {
-                var gdList = _context.Grades.OrderBy(k => k.GradeID).ToList();
-                int totalYears = Math.Min(gdList.Count, cohort.EndYear.Value - cohort.StartYear.Value);
-
-                for (int i = 0; i < totalYears; i++)
-                {
-                    var classNew = new tblClass
-                    {
-                        ClassName = _class.ClassName,
-                        MaxStudents = _class.MaxStudents,
-                        CurrentStudents = 0,
-                        IsActive = _class.IsActive,
-                        CohortID = _class.CohortID,
-                        GradeID = gdList[i].GradeID,
-                        SchoolYear = $"{cohort.StartYear + i}-{cohort.StartYear + i + 1}"
-                    };
-
-                    // Tránh trùng lớp cùng tên + khóa + SchoolYear
-                    bool exists = _context.Classes.Any(l =>
-                        l.ClassName == _class.ClassName &&
-                        l.CohortID == _class.CohortID &&
-                        l.SchoolYear == _class.SchoolYear);
-
-                    if (!exists)
-                        _context.Classes.Add(classNew);
-                }
-                _context.SaveChanges();
+                ModelState.AddModelError("", "Chưa chọn khóa học hợp lệ.");
+                LoadDropdowns();
+                return View(_class);
             }
+
+            var grades = _context.Grades
+                        .Where(g => g.IsActive && g.GradeName != null)
+                        .OrderBy(g => g.GradeID)
+                        .Take(4)
+                        .ToList();
+
+            var classList = new List<tblClass>();
+
+            for (int i = 0; i < grades.Count; i++)
+            {
+                var grade = grades[i];
+                int startYear = cohort.StartYear.Value + i;
+
+                var newClass = new tblClass
+                {
+                    ClassName = _class.ClassName,
+                    GradeID = grade.GradeID,
+                    CohortID = _class.CohortID,
+                    MaxStudents = _class.MaxStudents,
+                    CurrentStudents = 0,
+                    IsActive = _class.IsActive,
+                    SchoolYear = $"{startYear}-{startYear + 1}",
+                    cohort = cohort,
+                    grade = grade
+                };
+
+                classList.Add(newClass);
+            }
+
+            _context.Classes.AddRange(classList);
+            _context.SaveChanges();
 
             return RedirectToAction("Index");
         }
 
-        public IActionResult Edit(int? id)
+        // GET: Edit
+        [HttpGet]
+        public IActionResult Edit(int id)
         {
-            if (!id.HasValue) return NotFound();
-
-            var _class = _context.Classes
-                .Include(l => l.grade)
-                .Include(l => l.cohort)
-                .FirstOrDefault(l => l.ClassID == id);
-
-            if (_class == null) return NotFound();
-
-            LoadDropdowns(_class);
-            return View(_class);
+            var cls = _context.Classes.Find(id);
+            if (cls == null) return NotFound();
+            cls.grade = _context.Grades.FirstOrDefault(g => g.GradeID == cls.GradeID);
+            cls.cohort = _context.Cohorts.FirstOrDefault(c => c.CohortID == cls.CohortID);
+            return View(cls);
         }
 
+        // POST: Edit
         [HttpPost]
-        public IActionResult Edit(tblClass _class)
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(tblClass model)
         {
-            if (!ModelState.IsValid)
-            {
-                LoadDropdowns(_class);
-                return View(_class);
-            }
+            if (!ModelState.IsValid) return View(model);
 
-            var cohort = _context.Cohorts.Find(_class.CohortID);
+            var cls = _context.Classes.Find(model.ClassID);
+            if (cls == null) return NotFound();
 
-            // Chỉ tính SchoolYear nếu chưa có (giữ thủ công nếu đã nhập)
-            if (string.IsNullOrEmpty(_class.SchoolYear) && cohort != null && cohort.StartYear.HasValue)
-                _class.SchoolYear = ComputeSchoolYear(_class);
+            cls.ClassName = model.ClassName;
+            cls.MaxStudents = model.MaxStudents;
+            cls.CurrentStudents = model.CurrentStudents;
+            cls.IsActive = model.IsActive;
 
-            _context.Update(_class);
+            // Không sửa GradeID và CohortID
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
 
-        public IActionResult Delete(int? id)
+        // GET: Delete
+        [HttpGet]
+        public IActionResult Delete(int id)
         {
-            if (!id.HasValue) return NotFound();
+            var classItem = _context.Classes
+                .Include(c => c.grade)
+                .Include(c => c.cohort)
+                .FirstOrDefault(c => c.ClassID == id);
 
-            var _class = _context.Classes.Find(id);
-            if (_class == null) return NotFound();
+            if (classItem == null)
+                return NotFound();
 
-            return View(_class);
+            return View(classItem);
         }
 
+        // POST: Delete
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            var _class = _context.Classes.Find(id);
+            var classItem = _context.Classes.FirstOrDefault(c => c.ClassID == id);
+            if (classItem == null)
+                return NotFound();
+
+            _context.Classes.Remove(classItem);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult ToggleStatus(int id)
+        {
+            var _class = _context.Classes.FirstOrDefault(c => c.ClassID == id);
             if (_class != null)
             {
-                _context.Classes.Remove(_class);
+                _class.IsActive = !_class.IsActive;
                 _context.SaveChanges();
             }
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ToggleStatus(int id)
+        private void LoadDropdowns()
         {
-            var _class = await _context.Classes.FindAsync(id);
-            if (_class != null)
-            {
-                _class.IsActive = !_class.IsActive;
-                _context.Update(_class);
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        private void LoadDropdowns(tblClass _class = null)
-        {
-            // Lấy danh sách khối
-            ViewBag.gdList = new SelectList(_context.Grades.OrderBy(k => k.GradeID),
-                "GradeID", "GradeName", _class?.GradeID);
-
-            // Lấy danh sách khóa học (niên khóa)
             var chList = _context.Cohorts
                 .Where(c => c.IsActive)
-                .Select(c => new { c.CohortID, Info = c.StartYear + "-" + c.EndYear + " - Khóa " + c.CohortName })
+                .OrderBy(c => c.StartYear)
+                .Select(c => new
+                {
+                    c.CohortID,
+                    Display = c.StartYear + "-" + c.EndYear + " - Khóa " + c.CohortName
+                })
                 .ToList();
 
-            ViewBag.chList = new SelectList(chList, "CohortID", "Info", _class?.CohortID);
-        }
-
-
-        private string ComputeSchoolYear(tblClass _class)
-        {
-            if (_class.cohort == null || !_class.cohort.StartYear.HasValue) return null;
-
-            var gdList = _context.Grades.OrderBy(k => k.GradeID).ToList();
-            int index = gdList.FindIndex(k => k.GradeID == _class.GradeID);
-            if (index < 0) index = 0;
-
-            int startYear = _class.cohort.StartYear.Value + index;
-            return $"{startYear}-{startYear + 1}";
+            ViewBag.chList = new SelectList(chList, "CohortID", "Display");
         }
 
         // Thống kê

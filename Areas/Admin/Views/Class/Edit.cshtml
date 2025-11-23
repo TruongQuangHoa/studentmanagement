@@ -2,68 +2,63 @@
 @{
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
+
 <main id="main" class="main">
     <div class="pagetitle">
         <h2>Sửa thông tin lớp học</h2>
     </div>
-    <div class="container shadow p-5">
-        <form method="Post" asp-action="Edit">
-            <div class="form-row row">
-                <input type="text" class="form-contro" asp-for="ClassID" type="hidden">
-                <div class=" col-md-6 mb-3">
-                    <lable>Tên lớp</lable>
-                    <input type="text" class="form-control" asp-for="ClassName" placeholder="Tên lớp...">
-                    <span asp-validation-for="ClassName" class="alert-danger"></span>
-                </div>
 
-                <div class=" col-md-6 mb-3">
-                    <label>Mã khối</label>
-                    <select asp-for="GradeID" class="form-control"
-                        asp-items="@(new SelectList(ViewBag.gdList, "Value", "Text"))">
-                    </select>
-                </div>
+    <!-- Begin Form -->
+    <form asp-action="Edit" method="post">
 
-                <div class=" col-md-6 mb-3">
-                    <label>Số lượng tối đa</label>
-                    <input type="text" class="form-control" asp-for="MaxStudents" placeholder="Nhập số lượng tối đa...">
-                    <span asp-validation-for="MaxStudents" class="alert-danger"></span>
-                </div>
+        <input type="hidden" asp-for="ClassID" />
 
-                <div class=" col-md-6 mb-3">
-                    <label>Số lượng hiện tại</label>
-                    <input type="text" class="form-control" asp-for="CurrentStudents" placeholder="Nhập số lượng hiện tại...">
-                    <span asp-validation-for="CurrentStudents" class="alert-danger"></span>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>Năm học</label>
-                    <input type="text" class="form-control" asp-for="SchoolYear" required>
-                    <span asp-validation-for="SchoolYear" class="alert-danger"></span>
-                </div>
-
-                <div class="  col-md-6 mb-3">
-                    <label>Mã Khóa<span class="text-danger">*</span></label>
-                    <select asp-for="CohortID" class="form-control" asp-items="ViewBag.chList" required>
-                        <option value="">--- Khóa Học ---</option>
-                    </select>
-                    <span asp-validation-for="CohortID" class="text-danger"></span>
-                </div>
-
-                <div class=" col-md-6 mb-3">
-                    <label>
-                        @Html.CheckBox("IsActive", Model.IsActive)
-                        Hiện thị
-                    </label>
-                </div>
+        <div class="row">
+            <!-- Tên lớp -->
+            <div class="col-md-6 mb-3">
+                <label>Tên lớp</label>
+                <input type="text" class="form-control" asp-for="ClassName" required />
             </div>
-            <a asp-controller="Class" asp-action="Index" class="btn btn-lg btn-warning p-2">
-                <i class="bi bi-arrow-left-circle"></i>
-                Quay lại
-            </a>
 
-            <button type="submit" class="btn btn-lg btn-primary p-2">
-                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
-            </button>
-        </form>
-    </div>
+            <!-- Khối (readonly) -->
+            <div class="col-md-6 mb-3">
+                <label>Khối</label>
+                <input type="text" class="form-control" value="@Model.grade?.GradeName" readonly />
+            </div>
+
+            <!-- Khóa học (readonly) -->
+            <div class="col-md-6 mb-3">
+                <label>Khóa học</label>
+                <input type="text" class="form-control" value="@Model.cohort?.CohortName" readonly />
+            </div>
+
+            <!-- Số lượng tối đa -->
+            <div class="col-md-6 mb-3">
+                <label>Số lượng tối đa</label>
+                <input type="number" class="form-control" asp-for="MaxStudents" required />
+            </div>
+
+            <!-- Số lượng hiện tại -->
+            <div class="col-md-6 mb-3">
+                <label>Số lượng hiện tại</label>
+                <input type="number" class="form-control" asp-for="CurrentStudents" required />
+            </div>
+
+            <!-- Hiển thị -->
+            <div class="col-md-6 mb-3">
+                <label>Hiển thị</label><br />
+                <input type="checkbox" asp-for="IsActive" />
+            </div>
+        </div>
+
+        <a class="btn btn-lg btn-warning p-2 mr-5" href="javascript:history.back()">
+            <i class="bi bi-arrow-left-circle"></i> Quay lại
+        </a>
+
+        <button type="submit" class="btn btn-lg btn-primary p-2">
+            <i class="bi bi-save"></i> Lưu thay đổi
+        </button>
+
+    </form>
+    <!-- End Form -->
 </main>
