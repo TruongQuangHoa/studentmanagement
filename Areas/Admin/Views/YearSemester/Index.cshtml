@@ -8,7 +8,7 @@
 
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Danh sách năm học - học kỳ</h2>
+        <h2>Danh sách năm học, học kỳ</h2>
     </div>
 
     <section class="section dashboard">
@@ -37,7 +37,6 @@
                                         <td class="text-center">@stt</td>
                                         <td class="text-center">@item.SemesterName</td>
                                         <td class="text-center">@item.SchoolYear</td>
-
                                         <td class="text-center">
                                             <form asp-area="Admin" asp-controller="YearSemester" asp-action="ToggleStatus"
                                                 method="post">
@@ -59,7 +58,6 @@
                                                 title="Delete the yearsemester"
                                                 onclick="return confirm('Bạn có chắc chắn muốn xóa năm học - học kỳ này không?');"><i
                                                     class="bi bi-trash"></i></a>
-
                                         </td>
                                     </tr>
                                 }

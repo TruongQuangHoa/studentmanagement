@@ -11,23 +11,26 @@
     <div class="container shadow p-5">
         <form method="post" asp-action="Create">
             <div class="form-row">
-
                 <div class="form-group col-md-6 mb-3">
                     <label>Học sinh</label>
                     <select asp-for="StudentID" class="form-control"
-                        asp-items="@(ViewBag.StudentList != null ? new SelectList(ViewBag.StudentList, "Value", "Text") : new SelectList(new List<object>()))" required>
+                        asp-items="@(ViewBag.StudentList != null ? new SelectList(ViewBag.StudentList, "Value", "Text") : new SelectList(new List<object>()))"
+                        required>
                         <option value="">--- Chọn học sinh ---</option>
                     </select>
                     <span asp-validation-for="StudentID" class="text-danger"></span>
                 </div>
+
                 <!-- Khóa học -->
                 <div class="form-group col-md-4 mb-3">
-                    <label>Khóa</label>
-                    <select asp-for="CohortID" class="form-control" asp-items="@(ViewBag.CohortList as SelectList)" required>
+                    <label>Khóa học</label>
+                    <select asp-for="CohortID" class="form-control" asp-items="@(ViewBag.CohortList as SelectList)"
+                        required>
                         <option value="">--- Chọn khóa học ---</option>
                     </select>
                     <span asp-validation-for="CohortID" class="text-danger"></span>
                 </div>
+
                 <div class="form-group col-md-6 mb-3">
                     <label>Lớp học</label>
                     <select asp-for="ClassID" class="form-control"
@@ -35,6 +38,16 @@
                         <option value="">--- Chọn lớp học ---</option>
                     </select>
                     <span asp-validation-for="ClassID" class="text-danger"></span>
+                </div>
+
+                @* Thêm trường Học kỳ *@
+                <div class="form-group col-md-6 mb-3">
+                    <label>Học kỳ</label>
+                    <select asp-for="YearSemesterID" class="form-select"
+                        asp-items="@(ViewBag.SemesterList as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>()))">
+                        <option value="">-- Chọn học kỳ --</option>
+                    </select>
+                    <span asp-validation-for="YearSemesterID" class="text-danger"></span>
                 </div>
 
                 <div class="form-group col-md-6 mb-3">

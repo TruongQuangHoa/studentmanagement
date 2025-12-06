@@ -5,33 +5,42 @@
 
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Xóa học Sinh - lớp Học</h2>
+        <h2>Xóa thông tin học sinh - lớp học</h2>
     </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="StudentClassID">Mã học sinh - lớp học</label>
+            <input type="text" class="form-control mb-3" asp-for="StudentClassID" disabled />
+        </div>
 
-    <div class="container shadow p-5">
-        <form asp-action="Delete" method="post">
-            <input type="hidden" asp-for="StudentClassID" />
+        <div class="form-group col-md-6 mb-3">
+            <label>Mã học sinh</label>
+            <input type="text" class="form-control" value="@Model.student?.StudentID" disabled />
+        </div>
 
-            <div class="form-row">
-                <div class="form-group col-md-6 mb-3">
-                    <label>Học Sinh</label>
-                    <input type="text" class="form-control" value="@Model.student?.FullName" disabled />
-                </div>
-                <div class="form-group col-md-6 mb-3">
-                    <label>Lớp Học</label>
-                    <input type="text" class="form-control" value="@Model._class?.ClassName" disabled />
-                </div>
-                
-            </div>
+        <div class="form-group col-md-6 mb-3">
+            <label>Học sinh</label>
+            <input type="text" class="form-control" value="@Model.student?.FullName" disabled />
+        </div>
 
-            <div class="mt-4">
-                <a class="btn btn-lg btn-warning p-2 me-3" href="javascript:history.back()">
-                    <i class="bi bi-arrow-left-circle"></i> Quay lại
-                </a>
-                <button type="submit" class="btn btn-lg btn-danger p-2">
-                    <i class="bi bi-trash"></i> Xóa
-                </button>
-            </div>
-        </form>
+        <div class="form-group col-md-6 mb-3">
+            <label>Khối lớp</label>
+            <input type="text" class="form-control" value="@(Model._class?.grade?.GradeName)" disabled />
+        </div>
+
+        <div class="form-group col-md-6 mb-3">
+            <label>Lớp học</label>
+            <input type="text" class="form-control" value="@Model._class?.ClassName" disabled />
+        </div>
     </div>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="StudentClassID" />
+        <a class="btn btn-lg btn-warning p-2 mr-5" href="javascript:history.back()">
+            <i class="bi bi-arrow-left-circle"></i> Quay lại
+        </a>
+
+        <button type="submit" class="btn btn-lg btn-danger p-2">
+            <i class="bi bi-trash"></i> Xóa
+        </button>
+    </form>
 </main>

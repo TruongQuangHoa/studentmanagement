@@ -16,16 +16,15 @@
                         <table class="table table-borderless datatable">
                             <thead>
                                 <tr>
-                                    <th>STT</th>
-                                    <th>Mã lớp</th>
-                                    <th>Tên lớp</th>
-                                    <th>Khối</th>
-                                    <th>Số lượng tối đa</th>
-                                    <th>Số lượng hiện tại</th>
-                                    <th>Năm học</th>
-                                    <th>Niên khóa</th>
-                                    <th>Hiển thị</th>
-                                    <th>Chức năng</th>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-1 text-center">Khối</th>
+                                    <th class="col-1 text-center">Tên lớp</th>
+                                    <th class="col-1 text-center">Số lượng tối đa</th>
+                                    <th class="col-1 text-center">Số lượng hiện tại</th>
+                                    <th class="col-1 text-center">Năm học</th>
+                                    <th class="col-2 text-center">Niên khóa</th>
+                                    <th class="col-1 text-center">Hiển thị</th>
+                                    <th class="col-1 text-center">Chức năng</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -36,29 +35,38 @@
                                 {
                                     stt++;
                                     <tr>
-                                        <td>@stt</td>
-                                        <td>@item.ClassID</td>
-                                        <td>
-                                            <a asp-area="Admin" asp-controller="Class" asp-action="Edit" asp-route-id="@item.ClassID">
+                                        <td class="text-center">@stt</td>
+                                        <td class="text-center">@item.grade?.GradeName</td>
+                                        <td class="text-center">
+                                            <a asp-area="Admin" asp-controller="Class" asp-action="Edit"
+                                                asp-route-id="@item.ClassID">
                                                 @item.ClassName
                                             </a>
                                         </td>
-                                        <td>@item.grade?.GradeName</td>
-                                        <td>@item.MaxStudents</td>
-                                        <td>@item.CurrentStudents</td>
-                                        <td>@item.SchoolYear</td>
-                                        <td>
-                                            @(item.cohort != null ? item.cohort.StartYear + "-" + item.cohort.EndYear + " - Khóa " + item.cohort.CohortName : "Chưa có khóa học")
+                                        <td class="text-center">@item.MaxStudents</td>
+                                        <td class="text-center">@item.CurrentStudents</td>
+                                        <td class="text-center">@item.SchoolYear</td>
+                                        <td class="text-center">
+                                            @(item.cohort != null ? item.cohort.StartYear + "-" + item.cohort.EndYear + " -                              Khóa " + item.cohort.CohortName : "Chưa có khóa học")
                                         </td>
-                                        <td>
-                                            <form asp-area="Admin" asp-controller="Class" asp-action="ToggleStatus" method="post">
+                                        <td class="text-center">
+                                            <form asp-area="Admin" asp-controller="Class" asp-action="ToggleStatus"
+                                                method="post">
                                                 <input type="hidden" name="id" value="@item.ClassID" />
-                                                <input type="checkbox" @(item.IsActive ? "checked" : "") onchange="this.form.submit()" />
+                                                <div class="form-check form-switch d-flex justify-content-center">
+                                                    <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                        name="IsActive" @(item.IsActive ? "checked" : "")
+                                                        onchange="this.form.submit()" />
+                                                </div>
                                             </form>
                                         </td>
-                                        <td>
-                                            <a asp-area="Admin" asp-controller="Class" asp-action="Edit" asp-route-id="@item.ClassID" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i></a>
-                                            <a asp-area="Admin" asp-controller="Class" asp-action="Delete" asp-route-id="@item.ClassID" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                        <td class="text-center">
+                                            <a asp-area="Admin" asp-controller="Class" asp-action="Edit"
+                                                asp-route-id="@item.ClassID" class="btn btn-primary btn-sm" title="Edit the class"><i
+                                                    class="bi bi-pencil"></i></a>
+                                            <a asp-area="Admin" asp-controller="Class" asp-action="Delete"
+                                                asp-route-id="@item.ClassID" class="btn btn-danger btn-sm" title="Delete the class"><i
+                                                    class="bi bi-trash"></i></a>
                                         </td>
                                     </tr>
                                 }

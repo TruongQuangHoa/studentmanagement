@@ -26,6 +26,7 @@
                 <div class="col-md-6 mb-3">
                     <label>Ngày sinh</label>
                     <input type="date" class="form-control" asp-for="Birth" required>
+                    <span asp-validation-for="Birth" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -35,6 +36,7 @@
                         <option value="Nữ">Nữ</option>
                         <option value="Khác">Khác</option>
                     </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -71,12 +73,11 @@
                 <div class="col-md-6 mb-3">
                     <label>Dân tộc</label>
                     <input type="text" class="form-control" asp-for="Nation" placeholder="Nhập dân tộc..." required>
-                    <span asp-validation-for="Nation" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Tôn giáo</label>
-                    <select asp-for="Religion" class="form-select">
+                    <select asp-for="Religion" class="form-select" required>
                         <option value="Có">Có</option>
                         <option value="Không">Không</option>
                         <option value="Không xác định">Không xác định</option>
@@ -85,7 +86,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Trạng thái học</label>
-                    <select asp-for="StatusStudent" class="form-select">
+                    <select asp-for="StatusStudent" class="form-select" required>
                         <option value="Đang học">Đang học</option>
                         <option value="Nghỉ học">Nghỉ học</option>
                         <option value="Bảo lưu">Bảo lưu</option>
@@ -95,15 +96,14 @@
 
                 <div class="col-md-6 mb-3">
                     <label>Số điện thoại</label>
-                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..." required>
-                    <span asp-validation-for="NumberPhone" class="text-danger"></span>
+                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..."
+                        required>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Hình ảnh</label>
                     <div class="input-group">
-                        <button class="btn btn-success" type="button" onclick="openDialog()">Choose an
-                            image</button>
+                        <button class="btn btn-success" type="button" onclick="openDialog()">Chọn một ảnh</button>
                         <input type="text" class="form-control" asp-for="Images" id="file_input">
                     </div>
                 </div>
@@ -122,15 +122,10 @@
 
             <button type="submit" value="Create" class="btn btn-lg btn-primary p-2" asp-action="Create"
                 onclick="return checkValue()">Lưu thông tin</button>
-
         </form>
     </div>
 </main>
 
-@* @{
-    var summerNote = new StudentManagement.Areas.Admin.Models.SummerNote("#Contents");
-    <partial name="_SummerNote" model="summerNote" />
-} *@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

@@ -38,27 +38,27 @@
                 <div class="col-md-6 mb-3">
                     <label>Tỉnh/Thành phố</label>
                     <input id="provinceInput" class="form-control" name="Province" value="@Model?.Province"
-                           placeholder="Nhập hoặc chọn tỉnh/thành phố" autocomplete="off" required />
+                        placeholder="Nhập hoặc chọn tỉnh/thành phố" autocomplete="off" required />
                     <select id="provinceSelect" size="5" class="form-select mt-1" style="display:none;"></select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Xã/Phường</label>
                     <input id="wardInput" class="form-control" name="Commune" value="@Model?.Commune"
-                           placeholder="Nhập hoặc chọn xã/phường" autocomplete="off" required/>
+                        placeholder="Nhập hoặc chọn xã/phường" autocomplete="off" required />
                     <select id="wardSelect" size="5" class="form-select mt-1" style="display:none;"></select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Nhập xóm</label>
                     <input type="text" class="form-control" id="hamletInput" name="Hamlet" value="@Model?.Hamlet"
-                           placeholder="Nhập xóm..." required>
+                        placeholder="Nhập xóm..." required>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>Quốc tịch</label>
                     <input id="quocTich" class="form-control" name="Nationality"
-                           value="@(Model?.Nationality ?? "Việt Nam")" placeholder="Việt Nam" required/>
+                        value="@(Model?.Nationality ?? "Việt Nam")" placeholder="Việt Nam" required />
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -106,7 +106,8 @@
 
                 <div class="form-group col-md-6 mb-3">
                     <label>Số điện thoại</label>
-                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..." required>
+                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..."
+                        required>
                 </div>
 
                 <div class="form-group col-md-6 mb-3">
@@ -131,7 +132,7 @@
 
                             <div class="form-check form-check-inline">
                                 <input type="checkbox" class="form-check-input" name="SelectedSubjectIDs"
-                                       value="@subject.Value" @(isChecked ? "checked" : "") />
+                                    value="@subject.Value" @(isChecked ? "checked" : "") />
                                 <label class="form-check-label">@subject.Text</label>
                             </div>
                         }

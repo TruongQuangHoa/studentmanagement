@@ -1,0 +1,184 @@
+@model StudentManagement.Models.tblScore
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Thêm mới điểm học sinh</h2>
+    </div>
+    <div class="container shadow p-5">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form method="post" asp-action="Create">
+            <div class="row">
+                <!-- Học sinh -->
+                <div class="form-group col-md-4 mb-3">
+                    <label>Mã học sinh</label>
+                    <select asp-for="StudentID" class="form-control" asp-items="ViewBag.stList" required>
+                        <option value="">--- Chọn học sinh ---</option>
+                    </select>
+                </div>
+
+                <!-- Môn học -->
+                <div class="form-group col-md-4 mb-3">
+                    <label>Môn học</label>
+                    <select asp-for="SubjectID" class="form-control" asp-items="ViewBag.sbList" required>
+                        <option value="">--- Tên môn học ---</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4 mb-3">
+                    <label>Học kỳ - năm học</label>
+                    <select asp-for="YearSemesterID" class="form-control" asp-items="ViewBag.YearSemesterList" required>
+                        <option value="">--- Chọn học kỳ - năm học ---</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4 mb-3">
+                    <label>Điểm miệng 1</label>
+                    <input asp-for="OralScore1" id="OralScore1" class="form-control" type="number" step="0.1" min="0"
+                        max="10" required />
+                </div>
+                <div class="form-group col-md-4 mb-3">
+                    <label>Điểm miệng 2</label>
+                    <input asp-for="OralScore2" id="OralScore2" class="form-control" type="number" step="0.1" min="0"
+                        max="10" required />
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label>Điểm 15 phút 1</label>
+                    <input asp-for="Score15Minute1" id="Score15Minute1" class="form-control" type="number" step="0.1"
+                        min="0" max="10" required />
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label>Điểm 15 phút 2</label>
+                    <input asp-for="Score15Minute2" id="Score15Minute2" class="form-control" type="number" step="0.1"
+                        min="0" max="10" required />
+                </div>
+
+                <!-- Điểm trung bình đánh giá thường xuyên -->
+                <div class="form-group col-md-6 mb-3">
+                    <label>Điểm trung bình đánh giá thường xuyên</label>
+                    <input asp-for="Average_CA_Score" id="Average_CA_Score" class="form-control" readonly />
+                </div>
+
+                <!-- Giữa kỳ và cuối kỳ -->
+                <div class="form-group col-md-6 mb-3">
+                    <label>Điểm giữa kỳ</label>
+                    <input asp-for="MidtermScore" id="MidtermScore" class="form-control" type="number" step="0.1"
+                        min="0" max="10" required />
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label>Điểm cuối kỳ</label>
+                    <input asp-for="FinalScore" id="FinalScore" class="form-control" type="number" step="0.1" min="0"
+                        max="10" required />
+                </div>
+
+                <!-- Điểm trung bình -->
+                <div class="form-group col-md-6 mb-3">
+                    <label>Điểm trung bình môn học</label>
+                    <input asp-for="AverageScore" id="AverageScore" class="form-control" readonly />
+                </div>
+
+                <!-- Ghi chú -->
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ghi chú</label>
+                    <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                </div>
+
+                <!-- Ngày cập nhật -->
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ngày cập nhật</label>
+                    <input asp-for="CreateDate" class="form-control" type="date"
+                        value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <!-- Hiển thị -->
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", false) Hiển thị
+                    </label>
+                </div>
+            </div>
+
+            <a asp-controller="Score" asp-action="Index" class="btn btn-warning">
+                <i class="bi bi-arrow-left-circle"></i> Quay lại
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>
+
+
+<script>
+    // Hàm lấy giá trị float từ input, trả về null nếu không nhập hoặc không hợp lệ
+    function getScoreValue(id) {
+        const element = document.getElementById(id);
+        if (element && element.value) {
+            const value = parseFloat(element.value);
+            // Kiểm tra giá trị có phải là số và nằm trong khoảng [0, 10]
+            if (!isNaN(value) && value >= 0 && value <= 10) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    function calculateAverage() {
+        // === BƯỚC 1: TÍNH ĐIỂM TB ĐÁNH GIÁ THƯỜNG XUYÊN (Average_CA_Score) ===
+        const caScores = [];
+        const oral1 = getScoreValue("OralScore1");
+        const oral2 = getScoreValue("OralScore2");
+        const minute1 = getScoreValue("Score15Minute1");
+        const minute2 = getScoreValue("Score15Minute2");
+
+        if (oral1 !== null) caScores.push(oral1);
+        if (oral2 !== null) caScores.push(oral2);
+        if (minute1 !== null) caScores.push(minute1);
+        if (minute2 !== null) caScores.push(minute2);
+
+        let averageCAScore = null;
+        let displayAverageCAScore = '';
+
+        if (caScores.length > 0) {
+            const sumCA = caScores.reduce((a, b) => a + b, 0);
+            const rawAverageCA = sumCA / caScores.length;
+            // Làm tròn đến 1 chữ số thập phân (logic đồng bộ với C#)
+            averageCAScore = Math.round(rawAverageCA * 10) / 10;
+            displayAverageCAScore = averageCAScore.toFixed(1);
+        }
+
+        // Cập nhật giá trị cho ô "Điểm trung bình đánh giá thường xuyên"
+        document.getElementById("Average_CA_Score").value = displayAverageCAScore;
+
+
+        // === BƯỚC 2: TÍNH ĐIỂM TRUNG BÌNH MÔN HỌC KỲ (AverageScore) ===
+        const midterm = getScoreValue("MidtermScore");
+        const final = getScoreValue("FinalScore");
+
+        let averageSubjectScore = '';
+
+        // Chỉ tính khi có đủ TB ĐGTX, Giữa kỳ và Cuối kỳ
+        if (averageCAScore !== null && midterm !== null && final !== null) {
+            // Công thức: (TB_ĐGTX*1 + Giữa kỳ*2 + Cuối kỳ*3) / 6
+            const numerator = (averageCAScore * 1) + (midterm * 2) + (final * 3);
+            const rawAvg = numerator / 6;
+
+            // Làm tròn kết quả cuối cùng (1 chữ số thập phân)
+            averageSubjectScore = (Math.round(rawAvg * 10) / 10).toFixed(1);
+        }
+
+        // Cập nhật Điểm trung bình môn học kỳ hiển thị
+        document.getElementById("AverageScore").value = averageSubjectScore;
+    }
+
+    // 5. Gắn sự kiện "input" cho TẤT CẢ các trường điểm liên quan
+    document.getElementById("OralScore1")?.addEventListener("input", calculateAverage);
+    document.getElementById("OralScore2")?.addEventListener("input", calculateAverage);
+    document.getElementById("Score15Minute1")?.addEventListener("input", calculateAverage);
+    document.getElementById("Score15Minute2")?.addEventListener("input", calculateAverage);
+
+    // Điểm giữa và cuối kỳ cũng cần trigger để cập nhật AverageSubjectScore
+    document.getElementById("MidtermScore")?.addEventListener("input", calculateAverage);
+    document.getElementById("FinalScore")?.addEventListener("input", calculateAverage);
+</script>

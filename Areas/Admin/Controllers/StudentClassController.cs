@@ -28,9 +28,11 @@ namespace StudentManagement.Areas.Admin.Controllers
         {
             var scList = _context.StudentClasses
                         .Include(h => h.student)
+                        .Include(h => h.yearSemester)
                         .Include(h => h._class)
                             .ThenInclude(l => l!.grade)
                         .ToList();
+            // LoadStudentDataForCreate();
             LoadData();
             return View(scList);
         }
@@ -54,18 +56,41 @@ namespace StudentManagement.Areas.Admin.Controllers
             }
         }
 
-        private void LoadData(int? selectedClassID = null, int? selectedSemesterID = null, int? selectedCourseID = null)
+        //[HttpPost]
+        // private void LoadStudentDataForCreate()
+        // {
+        //     // Lấy danh sách StudentID của tất cả học sinh đang hoạt động trong bất kỳ lớp nào
+        //     var existingStudentIds = _context.StudentClasses
+        //         .Where(sc => sc.IsActive == true)
+        //         .Select(sc => sc.StudentID)
+        //         .Distinct()
+        //         .ToList();
+
+        //     // Lọc danh sách học sinh: chỉ lấy những học sinh đang hoạt động VÀ chưa có trong lớp học
+        //     var stList = _context.Students
+        //         .Where(c => c.IsActive == true && !existingStudentIds.Contains(c.StudentID))
+        //         .Select(st => new
+        //         {
+        //             st.StudentID,
+        //             Info = st.StudentID + " - " + st.FullName
+        //         }).ToList();
+
+        //     // Tạo SelectList cho ViewBag.StudentList
+        //     ViewBag.StudentList = new SelectList(stList, "StudentID", "Info");
+        // }
+
+        private void LoadData(int? selectedClassID = null, int? selectedSemesterID = null, int? selectedCohortID = null)
         {
             // Danh sách học sinh
             var students = _context.Students
-                .Select(s => new { Value = s.StudentID, Text = s.FullName })
-                .ToList();
+               .Select(s => new { Value = s.StudentID, Text = s.FullName })
+               .ToList();
 
             var stList = _context.Students.Where(c => c.IsActive == true)
-                        .Select(st => new
+                        .Select(hs => new
                         {
-                            st.StudentID,
-                            Info = st.StudentID + " - " + st.FullName
+                            hs.StudentID,
+                            Info = hs.StudentID + " - " + hs.FullName
                         }).ToList();
             ViewBag.StudentList = new SelectList(stList, "StudentID", "Info");
 
@@ -87,26 +112,25 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             ViewBag.ClassList = new SelectList(clList, "ClassID", "Info", selectedClassID);
 
-            // Danh sách năm học - học kỳ
-            var ysList = _context.YearSemesters
+            var semesterList = _context.YearSemesters
                 .Where(s => s.IsActive)
-                .Select(s => new { s.YearSemesterID, Text = s.SemesterName + " - " + s.SchoolYear })
+                .Select(s => new { s.YearSemesterID, Text = s.SemesterName + " | Năm học: " + s.SchoolYear })
                 .ToList();
 
-            ViewBag.ysList = new SelectList(ysList, "SemesterID", "Text", selectedSemesterID);
+            ViewBag.SemesterList = new SelectList(semesterList, "YearSemesterID", "Text", selectedSemesterID); // <== Cần thêm vào
 
-            // Danh sách khóa học
             var chList = _context.Cohorts
                 .Where(c => c.IsActive)
-                .Select(c => new { c.CohortID, Text = c.CohortName })
+                .Select(c => new { c.CohortID, Text = (c.StartYear + "-" + c.EndYear) + " | K" + c.CohortName })
                 .ToList();
 
-            ViewBag.CohortList = new SelectList(chList, "CohortID", "Text", selectedCourseID);
+            ViewBag.CohortList = new SelectList(chList, "CohortID", "Text", selectedCohortID);
         }
 
         public IActionResult Create()
         {
-            LoadData();
+            //LoadStudentDataForCreate(); // Load StudentList cho trang Create
+            LoadData(); // Load ClassList và CohortList và SemesterList
             return View();
         }
 
@@ -132,26 +156,25 @@ namespace StudentManagement.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Lấy tất cả năm học - học kỳ thuộc niên khóa của lớp
-            var yearsemesters = _context.YearSemesters
-                .Where(s => s.SemesterName == _class.SchoolYear && s.IsActive)
+            // Lấy tất cả học kỳ thuộc niên khóa của lớp
+            var semesters = _context.YearSemesters
+                .Where(s => s.SchoolYear == _class.SchoolYear && s.IsActive)
                 .ToList();
 
-            if (!yearsemesters.Any())
+            if (!semesters.Any())
             {
-                TempData["Error"] = $"Chưa khai báo năm học - học kỳ cho niên khóa {_class.SchoolYear}.";
+                TempData["Error"] = $"Chưa khai báo học kỳ cho niên khóa {_class.SchoolYear}.";
                 return RedirectToAction(nameof(Index));
             }
 
             int addedCount = 0;
-
-            foreach (var yearsemester in yearsemesters)
+            foreach (var semester in semesters)
             {
                 // Kiểm tra trùng
                 bool exists = _context.StudentClasses
                     .Any(h => h.StudentID == model.StudentID &&
                               h.ClassID == model.ClassID &&
-                              h.YearSemesterID == yearsemester.YearSemesterID &&
+                              h.YearSemesterID == semester.YearSemesterID &&
                               h.CohortID == _class.CohortID &&
                               h.IsActive);
 
@@ -161,7 +184,7 @@ namespace StudentManagement.Areas.Admin.Controllers
                 {
                     StudentID = model.StudentID,
                     ClassID = model.ClassID,
-                    YearSemesterID = yearsemester.YearSemesterID,
+                    YearSemesterID = semester.YearSemesterID,
                     CohortID = _class.CohortID,
                     IsActive = true
                 };
@@ -276,7 +299,7 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             if (entity == null) return NotFound();
 
-            LoadData();
+            LoadData(entity.ClassID, entity.YearSemesterID, entity._class?.CohortID);
             return View(entity);
         }
 
@@ -285,38 +308,49 @@ namespace StudentManagement.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                LoadData(model.ClassID);
+                LoadData(model.ClassID, model.YearSemesterID);
                 return View(model);
             }
 
-            var _class = _context.Classes
-                .Include(l => l.grade)
-                .Include(l => l.cohort)
-                .FirstOrDefault(l => l.ClassID == model.ClassID && l.IsActive);
+            var existing = _context.StudentClasses
+                .FirstOrDefault(h => h.StudentClassID == model.StudentClassID);
 
-            if (_class == null)
+            if (existing == null)
             {
-                ModelState.AddModelError("ClassID", "Lớp học không tồn tại hoặc không còn hoạt động.");
-                LoadData(model.ClassID);
+                ModelState.AddModelError("", "Không tìm thấy dữ liệu để cập nhật.");
+                LoadData(model.ClassID, model.YearSemesterID);
                 return View(model);
             }
 
-            var oldEntity = _context.StudentClasses.AsNoTracking()
-                              .FirstOrDefault(h => h.StudentClassID == model.StudentClassID);
+            var oldClassID = existing.ClassID; // Lưu lại lớp cũ trước khi thay đổi
+            bool isChangingClass = oldClassID != model.ClassID;
 
+            // === KIỂM TRA TRÙNG LẶP (giữ nguyên logic bạn đã viết tốt) ===
             bool exists = _context.StudentClasses
-                .Include(h => h._class)
                 .Any(h => h.StudentID == model.StudentID &&
-                          h._class!.SchoolYear == _class.SchoolYear &&
-                          h._class.GradeID == _class.GradeID &&
-                          h._class.CohortID == _class.CohortID &&
+                          h.YearSemesterID == model.YearSemesterID &&
+                          h.ClassID == model.ClassID &&
                           h.StudentClassID != model.StudentClassID &&
                           h.IsActive);
 
             if (exists)
             {
-                ModelState.AddModelError("StudentID", "Học sinh đã đăng ký lớp cùng khối, khóa và năm học.");
-                LoadData(model.ClassID);
+                ModelState.AddModelError("", "Học sinh đã được đăng ký vào lớp này trong học kỳ này.");
+                LoadData(model.ClassID, model.YearSemesterID);
+                return View(model);
+            }
+
+            bool existsInOtherClassInSameSemester = _context.StudentClasses
+                .Any(h => h.StudentID == model.StudentID &&
+                          h.YearSemesterID == model.YearSemesterID &&
+                          h.ClassID != model.ClassID &&
+                          h.StudentClassID != model.StudentClassID &&
+                          h.IsActive);
+
+            if (existsInOtherClassInSameSemester)
+            {
+                ModelState.AddModelError("", "Học sinh đã đăng ký ở lớp khác trong cùng học kỳ này.");
+                LoadData(model.ClassID, model.YearSemesterID);
                 return View(model);
             }
 
@@ -325,9 +359,37 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             if (oldEntity != null)
             {
-                UpdateCurrentStudents(oldEntity.ClassID);
-                if (oldEntity.ClassID != model.ClassID)
+                // Cập nhật dữ liệu
+                existing.StudentID = model.StudentID;
+                existing.ClassID = model.ClassID;
+                existing.YearSemesterID = model.YearSemesterID;
+                existing.IsActive = model.IsActive;
+
+                _context.SaveChanges();
+
+                // === CẬP NHẬT LẠI SỐ LƯỢNG HỌC SINH CHO CẢ LỚP CŨ VÀ LỚP MỚI ===
+                if (isChangingClass)
+                {
+                    // Cập nhật lớp cũ (giảm 1)
+                    UpdateCurrentStudents(oldClassID);
+
+                    // Cập nhật lớp mới (tăng 1)
                     UpdateCurrentStudents(model.ClassID);
+                }
+                else
+                {
+                    // Nếu chỉ thay đổi trạng thái IsActive hoặc học kỳ → vẫn cần cập nhật lại chính xác
+                    UpdateCurrentStudents(model.ClassID);
+                }
+
+                TempData["Success"] = "Cập nhật thông tin thành công!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Có lỗi xảy ra khi cập nhật: " + ex.Message);
+                LoadData(model.ClassID, model.YearSemesterID);
+                return View(model);
             }
             LoadData();
             return RedirectToAction("Index");
@@ -337,6 +399,7 @@ namespace StudentManagement.Areas.Admin.Controllers
         {
             var entity = _context.StudentClasses.Include(h => h.student)
                                                   .Include(h => h._class)
+                                                  .ThenInclude(l => l.grade)
                                                   .FirstOrDefault(h => h.StudentClassID == id);
             if (entity == null) return NotFound();
             return View(entity);

@@ -27,8 +27,8 @@ namespace StudentManagement.Models
         public DbSet<tblClass> Classes { get; set; }
         public DbSet<tblStudent> Students { get; set; }
         public DbSet<tblStudentClass> StudentClasses { get; set; }
-
-        public DbSet<tblPost> tblPost { get; set; }
+        public DbSet<tblScore> Scores { get; set; }
+        public DbSet<tblPost> Posts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -54,13 +54,19 @@ namespace StudentManagement.Models
                 .WithMany(x => x.teachersubject)
                 .HasForeignKey(x => x.TeacherID)
                 .HasPrincipalKey(x => x.TeacherID);
-            
             // Quan hệ tblTeacherSubject -> tblSubject (N-1)
             modelBuilder.Entity<tblTeacherSubject>()
                 .HasOne(x => x.subject)
                 .WithMany(x => x.teacherSubject)
                 .HasForeignKey(x => x.SubjectID)
                 .HasPrincipalKey(x => x.SubjectID);
+
+           // Cấu hình quan hệ tblScore -> tblStudent
+            modelBuilder.Entity<tblScore>()
+                .HasOne(d => d.student)
+                .WithMany()
+                .HasForeignKey(d => d.StudentID)
+                .HasPrincipalKey(hs => hs.StudentID);
 
             // Gọi 1 lần duy nhất
             base.OnModelCreating(modelBuilder);

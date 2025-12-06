@@ -1,22 +1,25 @@
-// File: tblPost.cs (Trong thư mục Models)
-
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace StudentManagement.Models
 {
-    
-    public class tblPost 
+    [Table("tblPost")]
+    public class tblPost
     {
         [Key]
-        public int PostID { get; set; } 
-        
-        public string Title { get; set; }
-        public string Summary { get; set; }
-        public string ImageUrl { get; set; }
-        public bool? IsActive { get; set; }
-        public bool? IsFeatured { get; set; }
-        public int? PostOrder { get; set; }
-        
+        public long PostID { get; set; }
+        public string? Title { get; set; }
+        public string? Abstract { get; set; }
+        public string? Contents { get; set; }
+        public string? Images { get; set; }
+        public string? Link { get; set; }
+        public string? Anthor { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public bool IsActive { get; set; }
+        public int PostOrder { get; set; }
     }
 }

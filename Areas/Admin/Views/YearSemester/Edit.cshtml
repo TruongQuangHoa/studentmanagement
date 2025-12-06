@@ -4,7 +4,7 @@
 }
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Sửa năm học - học kỳ</h2>
+        <h2>Sửa thông tin năm học, học kỳ</h2>
     </div>
     <div class="container shadow p-5">
         <form method="Post" asp-action="Edit">
@@ -12,17 +12,19 @@
                 <input type="text" class="form-contro" asp-for="YearSemesterID" type="hidden">
                 <div class="form-group col-md-6 mb-3">
                     <label>Tên học kỳ</label>
-                    <input type="text" class="form-control" asp-for="SemesterName" placeholder="Nhập tên học kỳ..." required>
+                    <input type="text" class="form-control" asp-for="SemesterName" placeholder="Nhập tên học kỳ..."
+                        required>
                     <span asp-validation-for="SemesterName" class="alert-danger"></span>
                 </div>
 
 
                 <div class="form-group col-md-6 mb-3">
                     <label>Năm học</label>
-                    <input type="text" class="form-control" asp-for="SchoolYear" placeholder="Nhập năm học ..." required>
+                    <input type="text" class="form-control" asp-for="SchoolYear" placeholder="Nhập năm học ..."
+                        required>
                     <span asp-validation-for="SchoolYear" class="alert-danger"></span>
                 </div>
-                
+
                 <div class="form-group col-md-6 mb-3">
                     <label>
                         @Html.CheckBox("IsActive", Model.IsActive)

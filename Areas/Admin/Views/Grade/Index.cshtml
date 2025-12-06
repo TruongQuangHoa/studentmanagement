@@ -6,7 +6,6 @@
 <main id="main" class="main">
     <div class="pagetitle">
         <h2>Danh sách chức năng</h2>
-
         <p>
         <section class="section dashboard">
             <div class="row">
@@ -30,37 +29,35 @@
                                     @foreach (var item in Model)
                                     {
                                         stt++; // 2. Tăng biến đếm cho mỗi mục
-                                        <tr>
-                                            <td class="text-center" scope="row">@stt</td>
-                                            <td class="text-left text-primary text-center" scope="row">
-                                                <a asp-area="Admin" asp-controller="QLKhoi" asp-action="Details"
-                                                    asp-route-id="@item.GradeID">
-                                                    @item.GradeName
-                                                </a>
-                                            </td>
-                                            <td class="text-center" scope="row">@item.Description</td>
-                                            <td class="text-center">
-                                                <form asp-area="Admin" asp-controller="Grade" asp-action="ToggleStatus"
-                                                    method="post">
-                                                    <input type="hidden" name="id" value="@item.GradeID" />
-                                                    <div class="form-check form-switch d-flex justify-content-center">
-                                                        <input class="form-check-input toggle-status-switch" type="checkbox"
-                                                            name="IsActive" @(item.IsActive ? "checked" : "")
-                                                            onchange="this.form.submit()" />
-                                                    </div>
-                                                </form>
-                                            </td>
-
-                                            <td class="text-center" scope="row">
-                                                <a asp-area="Admin" asp-controller="Grade" asp-action="Edit"
-                                                    asp-route-id="@item.GradeID" class="btn btn-primary btn-sm"
-                                                    title="Edit the grade"><i class="bi bi-pencil"></i></a>
-                                                <a asp-area="Admin" asp-controller="Grade" asp-action="Delete"
-                                                    asp-route-id="@item.GradeID" class="btn btn-danger btn-sm"
-                                                    title="Delete the grade"><i class="bi bi-trash"></i></a>
-
-                                            </td>
-                                        </tr>
+                                               <tr>
+                                                   <td class="text-center" scope="row">@stt</td>
+                                                   <td class="text-left text-primary text-center" scope="row">
+                                                       <a asp-area="Admin" asp-controller="Grade" asp-action="Details"
+                                                           asp-route-id="@item.GradeID">
+                                                           @item.GradeName
+                                                       </a>
+                                                   </td>
+                                                   <td class="text-center" scope="row">@item.Description</td>
+                                                   <td class="text-center">
+                                                       <form asp-area="Admin" asp-controller="Grade" asp-action="ToggleStatus"
+                                                           method="post">
+                                                           <input type="hidden" name="id" value="@item.GradeID" />
+                                                           <div class="form-check form-switch d-flex justify-content-center">
+                                                               <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                                   name="IsActive" @(item.IsActive ? "checked" : "")
+                                                                   onchange="this.form.submit()" />
+                                                           </div>
+                                                       </form>
+                                                   </td>
+                                                   <td class="text-center" scope="row">
+                                                       <a asp-area="Admin" asp-controller="Grade" asp-action="Edit"
+                                                           asp-route-id="@item.GradeID" class="btn btn-primary btn-sm"
+                                                           title="Edit the grade"><i class="bi bi-pencil"></i></a>
+                                                       <a asp-area="Admin" asp-controller="Grade" asp-action="Delete"
+                                                           asp-route-id="@item.GradeID" class="btn btn-danger btn-sm"
+                                                           title="Delete the grade"><i class="bi bi-trash"></i></a>
+                                                   </td>
+                                               </tr>
                                     }
                                 </tbody>
                             </table>
@@ -70,7 +67,5 @@
             </div>
         </section>
         </p>
-
-
     </div>
 </main>

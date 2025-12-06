@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace StudentManagement.Models
@@ -34,6 +35,7 @@ namespace StudentManagement.Models
         [ForeignKey(nameof(DepartmentID))]
         public virtual tblDepartment? department { get; set; }
         // Quan hệ N-N với Subject
+        [JsonIgnore]
         public virtual ICollection<tblTeacherSubject> teachersubject { get; set; } = new List<tblTeacherSubject>();
     }
 }

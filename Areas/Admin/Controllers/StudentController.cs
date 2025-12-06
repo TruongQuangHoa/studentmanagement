@@ -68,10 +68,11 @@ namespace StudentManagement.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(tblStudent student, int? ClassID) // Thêm ClassID để lưu lớp luôn
         {
-            // Kiểm tra trùng mã học sinh trong DB
-            if (_context.Students.Any(s => s.StudentID == student.StudentID))
+            // Kiểm tra xem StudentID đã tồn tại chưa
+            if (_context.Students.Any(t => t.StudentID == st.StudentID))
             {
-                ModelState.AddModelError("StudentID", "Mã học sinh này đã tồn tại.");
+                // Thêm lỗi vào ModelState
+                ModelState.AddModelError("StudentID", "Mã học sinh này đã tồn tại trong hệ thống.");
             }
 
             if (ModelState.IsValid)
@@ -155,12 +156,14 @@ namespace StudentManagement.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(tblStudent st, int? ClassID)
-        {
+        {   
+            // Kiểm tra trùng lặp StudentID, nhưng cho phép chính bản ghi đang chỉnh sửa
             var existingStudent = _context.Students.AsNoTracking().FirstOrDefault(t => t.StudentID == st.StudentID);
             
+            // Nếu bạn dùng ID là khóa chính, ta kiểm tra StudentID trùng với học sinh khác (ID khác)
             if (existingStudent != null && existingStudent.ID != st.ID)
             {
-                ModelState.AddModelError("StudentID", "Mã học sinh này đã tồn tại cho người khác.");
+                ModelState.AddModelError("StudentID", "Mã học sinh này đã tồn tại cho một học sinh khác.");
             }
 
             if (ModelState.IsValid)

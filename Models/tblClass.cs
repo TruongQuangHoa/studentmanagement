@@ -17,7 +17,7 @@ namespace StudentManagement.Models
         public int ClassID { get; set; }
 
         [Required(ErrorMessage = "Tên lớp không được để trống")]
-        public string ClassName { get; set; }
+        public string? ClassName { get; set; }
 
         [BindNever]  // không bind từ form
         public int GradeID { get; set; }
@@ -29,7 +29,7 @@ namespace StudentManagement.Models
         public int CurrentStudents { get; set; }
 
         [BindNever]
-        public string SchoolYear { get; set; } = string.Empty;
+        public string? SchoolYear { get; set; } = string.Empty;
 
         public bool IsActive { get; set; }
 

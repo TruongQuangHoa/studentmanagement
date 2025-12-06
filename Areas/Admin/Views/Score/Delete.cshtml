@@ -1,0 +1,61 @@
+@model StudentManagement.Models.tblScore
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Xóa thông tin điểm học sinh</h2>
+    </div>
+    <div class="form-row row">
+        <div class="form-group col-md-6">
+            <label asp-for="StudentID">Mã học sinh</label>
+            <input type="text" class="form-control mb-3" asp-for="StudentID" disabled />
+        </div>
+
+        <div class="form-group col-md-6 mb-3">
+            <label>Tên học sinh</label>
+            <input type="text" class="form-control" value="@Model.student?.FullName" disabled />
+        </div>
+
+        <div class="form-group col-md-6 mb-3">
+            <label>Khối lớp</label>
+            <input type="text" class="form-control" 
+                   value="@(Model.student?.studentclass?.FirstOrDefault(stc => stc.IsActive)?._class?.grade?.GradeName)" disabled />
+        </div>
+
+        <div class="form-group col-md-6 mb-3">
+            <label>Lớp học</label>
+            <input type="text" class="form-control" 
+                   value="@(Model.student?.studentclass?.FirstOrDefault(stc => stc.IsActive)?._class?.ClassName)" disabled />
+        </div>
+        
+        <div class="form-group col-md-6 mb-3">
+            <label>Môn học</label>
+            <input type="text" class="form-control" value="@Model.subject?.SubjectName" disabled />
+        </div>
+
+        <div class="form-group col-md-6 mb-3">
+            <label>Học kỳ</label>
+            <input type="text" class="form-control" value="@Model.yearSemester?.SemesterName" disabled />
+        </div>
+
+        <div class="form-group col-md-6 mb-3">
+            <label>Năm học</label>
+            <input type="text" class="form-control" value="@Model.yearSemester?.SchoolYear" disabled />
+        </div>
+
+        <div class="form-group col-md-6">
+            <label asp-for="AverageScore">Điểm trung bình môn học</label>
+            <input type="text" class="form-control mb-3" asp-for="AverageScore" disabled />
+        </div>
+    </div>
+    <form asp-action="Delete" method="Post">
+        <input type="hidden" asp-for="ScoreID" />
+        <a class="btn btn-lg btn-warning p-2 mr-5" href="javascript:history.back()">
+            <i class="bi bi-arrow-left-circle"></i> Quay lại
+        </a>
+        <button type="submit" class="btn btn-lg btn-danger p-2">
+            <i class="bi bi-trash"></i> Xóa
+        </button>
+    </form>
+    </main>

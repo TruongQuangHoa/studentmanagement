@@ -21,6 +21,5 @@ namespace StudentManagement.Models
 
         [ForeignKey(nameof(SubjectID))]
         public tblSubject? subject { get; set; }
-
     }
 }
