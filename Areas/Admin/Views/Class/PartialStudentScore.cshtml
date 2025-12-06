@@ -1,0 +1,31 @@
+@model IEnumerable<dynamic>
+
+// Nếu không có phần tử, trả về rỗng
+@if (!Model.Any())
+{
+    @* Không render gì *@
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Mã HS</th>
+                <th>Họ tên</th>
+                <th>Môn</th>
+                <th>Điểm TB</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.StudentID</td>
+                <td>@item.FullName</td>
+                <td>@item.SubjectName</td>
+                <td>@item.AverageScore</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

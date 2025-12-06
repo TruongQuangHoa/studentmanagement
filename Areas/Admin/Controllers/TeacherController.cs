@@ -117,7 +117,6 @@ namespace StudentManagement.Areas.Admin.Controllers
         {
             // Kiểm tra trùng lặp TeacherID, nhưng cho phép chính bản ghi đang chỉnh sửa
             var existingTeacher = _context.Teachers.AsNoTracking().FirstOrDefault(t => t.TeacherID == model.TeacherID);
-
             // Nếu bạn dùng ID là khóa chính, ta kiểm tra TeacherID trùng với giáo viên khác (ID khác)
             if (existingTeacher != null && existingTeacher.ID != model.ID)
             {
@@ -127,7 +126,6 @@ namespace StudentManagement.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 _context.Teachers.Update(model);
-
                 // Xóa môn học cũ
                 var oldSubjects = _context.TeacherSubjects.Where(x => x.TeacherID == model.TeacherID);
                 _context.TeacherSubjects.RemoveRange(oldSubjects);
@@ -144,7 +142,6 @@ namespace StudentManagement.Areas.Admin.Controllers
                         });
                     }
                 }
-
                 _context.SaveChanges();
                 return RedirectToAction("Index");
             }

@@ -1,0 +1,820 @@
+@{
+    ViewData["Title"] = "Thống Kê Học Sinh";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle d-flex justify-content-between align-items-center mb-3">
+        <h1>Thống Kê Học Sinh</h1>
+        <a href="@Url.Action("Index", "QLHocSinh", new { area = "Admin" })" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    <!-- Thông báo lỗi nếu có -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-octagon me-1"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thống kê tổng quan -->
+    <div class="row g-4">
+        <!-- Tổng số học sinh -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card info-card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng Số Học Sinh</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>@ViewBag.TotalStudents</h6>
+                                <span class="text-muted small">Học sinh</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-sm btn-outline-primary" onclick="showStudentList('all')">
+                                <i class="bi bi-list-ul me-1"></i>Xem DS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dân tộc thiểu số -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card info-card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Dân Tộc Thiểu Số</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle bg-danger text-white d-flex align-items-center justify-content-center">
+                                <i class="bi bi-flag-fill"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>@ViewBag.MinorityStudents</h6>
+                                <span class="text-muted small">@(ViewBag.TotalStudents > 0 ? Math.Round((decimal)ViewBag.MinorityStudents * 100 / ViewBag.TotalStudents, 1) : 0)%</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-sm btn-outline-primary" onclick="showStudentList('minority')">
+                                <i class="bi bi-list-ul me-1"></i>Xem DS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tỉ lệ giới tính -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card info-card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Tỉ Lệ Giới Tính</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div id="genderPieChart" style="width: 100px; height: 80px;"></div>
+                        <div class="text-end">
+                            <select class="form-select form-select-sm mb-2" id="genderFilter" onchange="showGenderList()">
+                                <option value="">Tất cả</option>
+                                @if (ViewBag.GenderStats != null)
+                                {
+                                    foreach (var gender in ViewBag.GenderStats.Keys)
+                                    {
+                                        <option value="@Html.Raw(gender)">@Html.Raw(gender)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tôn giáo -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card info-card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Tôn Giáo</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div id="religionPieChart" style="width: 100px; height: 80px;"></div>
+                        <div class="text-end">
+                            <select class="form-select form-select-sm mb-2" id="religionFilter" onchange="showReligionList()">
+                                <option value="">Tất cả</option>
+                                @if (ViewBag.Religions != null)
+                                {
+                                    foreach (var religion in ViewBag.Religions.Keys)
+                                    {
+                                        <option value="@Html.Raw(religion)">@Html.Raw(religion)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ chính -->
+    <div class="row mt-4">
+        <!-- Phân bổ giới tính -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Phân Bổ Giới Tính</h5>
+                    <div id="genderBarChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trạng thái học tập -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Trạng Thái Học Tập</h5>
+                        <div class="d-flex">
+                            <select class="form-select form-select-sm me-2" id="statusFilter" onchange="showStatusList()">
+                                <option value="">Tất cả</option>
+                                @if (ViewBag.StudyStatus != null)
+                                {
+                                    foreach (var status in ViewBag.StudyStatus.Keys)
+                                    {
+                                        <option value="@Html.Raw(status)">@Html.Raw(status)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div id="statusBarChart" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ phụ -->
+    <div class="row mt-4">
+        <!-- Phân bổ độ tuổi -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Phân Bổ Theo Độ Tuổi</h5>
+                        <div class="d-flex">
+                            <select class="form-select form-select-sm me-2" id="ageFilter" onchange="showAgeList()">
+                                <option value="">Tất cả</option>
+                                @if (ViewBag.AgeStats != null)
+                                {
+                                    foreach (var age in ViewBag.AgeStats.Keys)
+                                    {
+                                        <option value="@Html.Raw(age)">@Html.Raw(age) tuổi</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div id="ageBarChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân bổ địa phương -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Phân Bổ Theo Địa Phương</h5>
+                        <div class="d-flex">
+                            <select class="form-select form-select-sm me-2" id="provinceFilter" onchange="showProvinceList()">
+                                <option value="">Tỉnh/Thành</option>
+                                @if (ViewBag.ProvinceStats != null)
+                                {
+                                    foreach (var province in ViewBag.ProvinceStats.Keys)
+                                    {
+                                        <option value="@Html.Raw(province)">@Html.Raw(province)</option>
+                                    }
+                                }
+                            </select>
+                            
+                        </div>
+                    </div>
+                    <div id="locationPieChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách chi tiết -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Chi Tiết Học Sinh <span id="listFilterTitle"></span></h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-download me-1"></i>Xuất báo cáo
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                                <li><a class="dropdown-item" href="#" onclick="exportToExcel()"><i class="bi bi-file-earmark-excel me-2"></i>Excel</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportToPDF()"><i class="bi bi-file-earmark-pdf me-2"></i>PDF</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="studentListContainer" class="mt-3 table-responsive">
+                        <p class="text-muted text-center">Chọn một tiêu chí để xem danh sách chi tiết</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        // Khởi tạo biểu đồ khi trang được tải
+        $(document).ready(function() {
+            renderGenderCharts();
+            renderStatusChart();
+            renderAgeChart();
+            renderReligionChart();
+            renderLocationChart();
+        });
+
+        // Biểu đồ tròn giới tính (nhỏ)
+        function renderGenderPieChart() {
+            var chartDom = document.getElementById('genderPieChart');
+            var myChart = echarts.init(chartDom);
+            
+            var genderData = [];
+            @if (ViewBag.GenderStats != null)
+            {
+                foreach (var item in ViewBag.GenderStats)
+                {
+                    @:genderData.push({ value: @item.Value, name: '@Html.Raw(item.Key)' });
+                }
+            }
+
+            var option = {
+                series: [{
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 5,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: { show: false },
+                    emphasis: { scale: false, label: { show: false } },
+                    data: genderData,
+                    color: ['#5470C6', '#EE6666', '#91CC75']
+                }]
+            };
+
+            myChart.setOption(option);
+            window.addEventListener('resize', function() { myChart.resize(); });
+        }
+
+        // Biểu đồ cột giới tính
+        function renderGenderBarChart() {
+            var chartDom = document.getElementById('genderBarChart');
+            var myChart = echarts.init(chartDom);
+            
+            var categories = [];
+            var seriesData = [];
+            
+            @if (ViewBag.GenderStats != null)
+            {
+                foreach (var item in ViewBag.GenderStats)
+                {
+                    @:categories.push('@Html.Raw(item.Key)');
+                    @:seriesData.push(@item.Value);
+                }
+            }
+
+            var option = {
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: categories,
+                    axisLabel: { rotate: 0, fontSize: 12 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Số lượng',
+                    nameLocation: 'middle',
+                    nameGap: 30,
+                    minInterval: 1
+                },
+                series: [{
+                    data: seriesData,
+                    type: 'bar',
+                    showBackground: true,
+                    backgroundStyle: { color: 'rgba(180, 180, 180, 0.2)' },
+                    itemStyle: {
+                        color: function(params) {
+                            var colorList = ['#5470C6', '#EE6666', '#91CC75'];
+                            return colorList[params.dataIndex % colorList.length];
+                        },
+                        borderRadius: [4, 4, 0, 0]
+                    },
+                    label: { show: true, position: 'top' }
+                }]
+            };
+
+            myChart.setOption(option);
+            window.addEventListener('resize', function() { myChart.resize(); });
+        }
+
+        // Biểu đồ trạng thái học tập
+        function renderStatusChart() {
+            var chartDom = document.getElementById('statusBarChart');
+            var myChart = echarts.init(chartDom);
+            
+            var categories = [];
+            var seriesData = [];
+            
+            @if (ViewBag.StudyStatus != null)
+            {
+                foreach (var item in ViewBag.StudyStatus)
+                {
+                    @:categories.push('@Html.Raw(item.Key)');
+                    @:seriesData.push(@item.Value);
+                }
+            }
+
+            var option = {
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'value',
+                    name: 'Số lượng',
+                    nameLocation: 'middle',
+                    nameGap: 25,
+                    minInterval: 1
+                },
+                yAxis: {
+                    type: 'category',
+                    data: categories,
+                    axisLabel: { fontSize: 12 }
+                },
+                series: [{
+                    data: seriesData,
+                    type: 'bar',
+                    showBackground: true,
+                    backgroundStyle: { color: 'rgba(180, 180, 180, 0.2)' },
+                    itemStyle: {
+                        color: function(params) {
+                            var colorList = ['#5470C6', '#91CC75', '#EE6666', '#FAC858', '#73C0DE'];
+                            return colorList[params.dataIndex % colorList.length];
+                        },
+                        borderRadius: [0, 4, 4, 0]
+                    },
+                    label: { show: true, position: 'right' }
+                }]
+            };
+
+            myChart.setOption(option);
+            window.addEventListener('resize', function() { myChart.resize(); });
+        }
+
+        // Biểu đồ độ tuổi
+        function renderAgeChart() {
+            var chartDom = document.getElementById('ageBarChart');
+            var myChart = echarts.init(chartDom);
+            
+            var categories = [];
+            var seriesData = [];
+            
+            @if (ViewBag.AgeStats != null)
+            {
+                foreach (var item in ViewBag.AgeStats)
+                {
+                    @:categories.push('@Html.Raw(item.Key)');
+                    @:seriesData.push(@item.Value);
+                }
+            }
+
+            var option = {
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: categories,
+                    axisLabel: { fontSize: 12 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Số lượng',
+                    nameLocation: 'middle',
+                    nameGap: 30,
+                    minInterval: 1
+                },
+                series: [{
+                    data: seriesData,
+                    type: 'bar',
+                    showBackground: true,
+                    backgroundStyle: { color: 'rgba(180, 180, 180, 0.2)' },
+                    itemStyle: {
+                        color: function(params) {
+                            var colorList = ['#5470C6', '#91CC75', '#EE6666', '#FAC858', '#73C0DE'];
+                            return colorList[params.dataIndex % colorList.length];
+                        },
+                        borderRadius: [4, 4, 0, 0]
+                    },
+                    label: { show: true, position: 'top' }
+                }]
+            };
+
+            myChart.setOption(option);
+            window.addEventListener('resize', function() { myChart.resize(); });
+        }
+
+        // Biểu đồ tôn giáo
+        function renderReligionChart() {
+            var chartDom = document.getElementById('religionPieChart');
+            var myChart = echarts.init(chartDom);
+            
+            var religionData = [];
+            @if (ViewBag.Religions != null)
+            {
+                foreach (var item in ViewBag.Religions)
+                {
+                    @:religionData.push({ value: @item.Value, name: '@Html.Raw(item.Key)' });
+                }
+            }
+
+            var option = {
+                series: [{
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 5,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: { show: false },
+                    emphasis: { scale: false, label: { show: false } },
+                    data: religionData,
+                    color: ['#5470C6', '#EE6666', '#91CC75', '#FAC858', '#73C0DE']
+                }]
+            };
+
+            myChart.setOption(option);
+            window.addEventListener('resize', function() { myChart.resize(); });
+        }
+
+        // Biểu đồ địa phương
+        function renderLocationChart() {
+            var chartDom = document.getElementById('locationPieChart');
+            var myChart = echarts.init(chartDom);
+            
+            var locationData = [];
+            @if (ViewBag.ProvinceStats != null)
+            {
+                foreach (var item in ViewBag.ProvinceStats)
+                {
+                    @:locationData.push({ value: @item.Value, name: '@Html.Raw(item.Key)' });
+                }
+            }
+
+            var option = {
+                tooltip: { trigger: 'item' },
+                legend: { orient: 'vertical', right: 10, top: 'center' },
+                series: [{
+                    name: 'Phân bổ',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+                    label: { show: false, position: 'center' },
+                    emphasis: {
+                        label: { show: true, fontSize: '18', fontWeight: 'bold' }
+                    },
+                    labelLine: { show: false },
+                    data: locationData.slice(0, 5), // Chỉ hiển thị top 5
+                    color: ['#5470C6', '#91CC75', '#EE6666', '#FAC858', '#73C0DE']
+                }]
+            };
+
+            myChart.setOption(option);
+            window.addEventListener('resize', function() { myChart.resize(); });
+        }
+
+        // Render tất cả biểu đồ giới tính
+        function renderGenderCharts() {
+            renderGenderPieChart();
+            renderGenderBarChart();
+        }
+
+        // Cập nhật tiêu đề danh sách
+        function updateListTitle(filterType, filterValue = '') {
+            let title = '';
+            switch (filterType) {
+                case 'all': title = '(Tất cả học sinh)'; break;
+                case 'minority': title = '(Học sinh dân tộc thiểu số)'; break;
+                case 'gender': title = `(Giới tính: ${filterValue || 'Tất cả'})`; break;
+                case 'religion': title = `(Tôn giáo: ${filterValue || 'Tất cả'})`; break;
+                case 'status': title = `(Trạng thái: ${filterValue || 'Tất cả'})`; break;
+                case 'age': title = `(Độ tuổi: ${filterValue || 'Tất cả'})`; break;
+                case 'province': title = `(Tỉnh/Thành: ${filterValue || 'Tất cả'})`; break;
+                case 'district': title = `(Quận/Huyện: ${filterValue || 'Tất cả'})`; break;
+            }
+            $('#listFilterTitle').text(title);
+        }
+
+        // Hiển thị danh sách học sinh
+        function showStudentList(filter) {
+            updateListTitle(filter);
+            var url = '@Url.Action("StudentListPartial", "QLHocSinh", new { area = "Admin" })';
+            
+            $.get(url, { filter: filter }, function (data) {
+                $('#studentListContainer').html(data ? generateStudentTable(data, filter) : noDataMessage());
+            }).fail(function() {
+                showError();
+            });
+        }
+
+        // Hiển thị danh sách theo trạng thái
+        function showStatusList() {
+            var status = $('#statusFilter').val();
+            updateListTitle('status', status);
+            
+            $.get('@Url.Action("StudentListPartial", "QLHocSinh", new { area = "Admin" })', { 
+                filter: 'status', 
+                statusFilter: status 
+            }, function (data) {
+                $('#studentListContainer').html(data ? generateStudentTable(data, 'status') : noDataMessage());
+            }).fail(function() {
+                showError();
+            });
+        }
+
+        // Hiển thị danh sách theo giới tính
+        function showGenderList() {
+            var gender = $('#genderFilter').val();
+            updateListTitle('gender', gender);
+            
+            $.get('@Url.Action("StudentListPartial", "QLHocSinh", new { area = "Admin" })', { 
+                filter: 'gender', 
+                genderFilter: gender 
+            }, function (data) {
+                $('#studentListContainer').html(data ? generateStudentTable(data, 'gender') : noDataMessage());
+            }).fail(function() {
+                showError();
+            });
+        }
+
+        // Hiển thị danh sách theo tôn giáo
+        function showReligionList() {
+            var religion = $('#religionFilter').val();
+            updateListTitle('religion', religion);
+            
+            $.get('@Url.Action("StudentListPartial", "QLHocSinh", new { area = "Admin" })', { 
+                filter: 'religion', 
+                religionFilter: religion 
+            }, function (data) {
+                $('#studentListContainer').html(data ? generateStudentTable(data, 'religion') : noDataMessage());
+            }).fail(function() {
+                showError();
+            });
+        }
+
+        // Hiển thị danh sách theo độ tuổi
+        function showAgeList() {
+            var ageRange = $('#ageFilter').val();
+            updateListTitle('age', ageRange);
+            
+            $.get('@Url.Action("StudentListPartial", "QLHocSinh", new { area = "Admin" })', { 
+                filter: 'age', 
+                ageRangeFilter: ageRange 
+            }, function (data) {
+                $('#studentListContainer').html(data ? generateStudentTable(data, 'age') : noDataMessage());
+            }).fail(function() {
+                showError();
+            });
+        }
+
+        // Hiển thị danh sách theo tỉnh/thành
+        function showProvinceList() {
+            var province = $('#provinceFilter').val();
+            updateListTitle('province', province);
+            
+            $.get('@Url.Action("StudentListPartial", "QLHocSinh", new { area = "Admin" })', { 
+                filter: 'province', 
+                provinceFilter: province 
+            }, function (data) {
+                $('#studentListContainer').html(data ? generateStudentTable(data, 'province') : noDataMessage());
+            }).fail(function() {
+                showError();
+            });
+        }
+
+        // Hiển thị danh sách theo quận/huyện
+        function showDistrictList() {
+            var district = $('#districtFilter').val();
+            updateListTitle('district', district);
+            
+            $.get('@Url.Action("StudentListPartial", "QLHocSinh", new { area = "Admin" })', { 
+                filter: 'district', 
+                districtFilter: district 
+            }, function (data) {
+                $('#studentListContainer').html(data ? generateStudentTable(data, 'district') : noDataMessage());
+            }).fail(function() {
+                showError();
+            });
+        }
+
+        // Tạo bảng học sinh
+        function generateStudentTable(data, filter) {
+            if (!data || data.length === 0) return noDataMessage();
+
+            var table = '<table class="table table-hover table-bordered table-striped" style="text-align:center;"><thead class="table-light"><tr>';
+            
+            // Tiêu đề cột
+            table += '<th>Mã HS</th><th>Họ và Tên</th>';
+            
+            if (filter === 'all' || filter === 'minority' || filter === 'province' || filter === 'district') {
+                table += '<th>Ngày sinh</th><th>Dân Tộc</th>';
+            }
+            
+            if (filter === 'all' || filter === 'religion') {
+                table += '<th>Tôn Giáo</th>';
+            }
+            
+            if (filter === 'all' || filter === 'status') {
+                table += '<th>Trạng Thái</th>';
+            }
+            
+            if (filter === 'all' || filter === 'gender') {
+                table += '<th>Giới Tính</th>';
+            }
+            
+            if (filter === 'all' || filter === 'age') {
+                table += '<th>Tuổi</th>';
+            }
+            
+            if (filter === 'all' || filter === 'province' || filter === 'district') {
+                table += '<th>Địa chỉ</th>';
+            }
+            
+            table += '</tr></thead><tbody>';
+
+            // Dữ liệu hàng
+            data.forEach(s => {
+                table += '<tr>';
+                table += `<td>${s.StudentID || 'N/A'}</td>`;
+                table += `<td>${s.FullName || 'N/A'}</td>`;
+                
+                if (filter === 'all' || filter === 'minority' || filter === 'province' || filter === 'district') {
+                    table += `<td>${formatDate(s.Birth)}</td>`;
+                    table += `<td>${s.Nation || 'N/A'}</td>`;
+                }
+                
+                if (filter === 'all' || filter === 'religion') {
+                    table += `<td>${s.Religion || 'N/A'}</td>`;
+                }
+                
+                if (filter === 'all' || filter === 'status') {
+                    table += `<td><span class="badge ${getStatusBadgeClass(s.StatusStudent)}">${s.StatusStudent || 'N/A'}</span></td>`;
+                }
+                
+                if (filter === 'all' || filter === 'gender') {
+                    table += `<td>${s.Gender || 'N/A'}</td>`;
+                }
+                
+                if (filter === 'all' || filter === 'age') {
+                    const age = calculateAge(s.Birth);
+                    table += `<td>${age || 'N/A'}</td>`;
+                }
+                
+                if (filter === 'all' || filter === 'province' || filter === 'district') {
+                    const address = [s.District, s.Province].filter(Boolean).join(', ');
+                    table += `<td>${address || 'N/A'}</td>`;
+                }
+                
+                table += '</tr>';
+            });
+
+            table += '</tbody></table>';
+            return table;
+        }
+
+        // Tính tuổi từ ngày sinh
+        function calculateAge(birthDate) {
+            if (!birthDate) return 'N/A';
+            
+            try {
+                // Giả sử birthDate có định dạng dd/MM/yyyy
+                const parts = birthDate.split('/');
+                if (parts.length !== 3) return 'N/A';
+                
+                const birth = new Date(parts[2], parts[1] - 1, parts[0]);
+                const today = new Date();
+                let age = today.getFullYear() - birth.getFullYear();
+                const m = today.getMonth() - birth.getMonth();
+                
+                if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                    age--;
+                }
+                
+                return age;
+            } catch {
+                return 'N/A';
+            }
+        }
+
+        // Định dạng ngày
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            
+            try {
+                // Xử lý cả 2 định dạng: ISO (yyyy-MM-dd) và dd/MM/yyyy
+                let date;
+                if (dateString.includes('-')) {
+                    date = new Date(dateString);
+                } else {
+                    const parts = dateString.split('/');
+                    if (parts.length === 3) {
+                        date = new Date(parts[2], parts[1] - 1, parts[0]);
+                    } else {
+                        return 'N/A';
+                    }
+                }
+                
+                return date.toLocaleDateString('vi-VN');
+            } catch {
+                return 'N/A';
+            }
+        }
+
+        // Lớp badge cho trạng thái
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'Đang học': return 'bg-success';
+                case 'Đã tốt nghiệp': return 'bg-primary';
+                case 'Đã chuyển trường': return 'bg-warning text-dark';
+                case 'Bảo lưu': return 'bg-info text-dark';
+                case 'Đã thôi học': return 'bg-secondary';
+                default: return 'bg-light text-dark';
+            }
+        }
+
+        // Thông báo không có dữ liệu
+        function noDataMessage() {
+            return '<p class="text-muted text-center py-4">Không có dữ liệu chi tiết cho lựa chọn này.</p>';
+        }
+
+        // Thông báo lỗi
+        function showError() {
+            return '<p class="text-danger text-center py-4">Đã xảy ra lỗi khi tải dữ liệu.</p>';
+        }
+
+        // Xuất Excel
+        function exportToExcel() {
+            const table = document.querySelector('#studentListContainer table');
+            if (!table) {
+                alert('Không có dữ liệu để xuất');
+                return;
+            }
+            
+            const ws = XLSX.utils.table_to_sheet(table);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "DanhSachHocSinh");
+            XLSX.writeFile(wb, "DanhSachHocSinh.xlsx");
+        }
+
+        // Xuất PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const title = `Danh sách học sinh ${$('#listFilterTitle').text()}`;
+            const table = document.querySelector('#studentListContainer table');
+            
+            if (!table) {
+                alert('Không có dữ liệu để xuất');
+                return;
+            }
+            
+            doc.text(title, 14, 10);
+            doc.autoTable({ html: table, startY: 20 });
+            doc.save('DanhSachHocSinh.pdf');
+        }
+    </script>

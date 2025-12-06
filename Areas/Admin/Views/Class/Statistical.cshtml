@@ -1,0 +1,627 @@
+@{
+    ViewData["Title"] = "Thống Kê Điểm";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+
+    var grades = ViewBag.GradeLevels as List<string> ?? new List<string>();
+    var classes = ViewBag.Classes as List<string> ?? new List<string>();
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Thống Kê Điểm</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/Admin">Home</a></li>
+                <li class="breadcrumb-item active">Thống Kê Điểm</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <!-- School-wide Stats -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng quan toàn trường</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="icon-box bg-primary">
+                                        <i class="bi bi-journal-text"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h6>Tổng số bài kiểm tra</h6>
+                                        <h3>@ViewBag.TotalExams</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="icon-box bg-success">
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h6>Điểm trung bình</h6>
+                                        <h3>@(((double)ViewBag.AverageScoreAll).ToString("N2"))</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="icon-box bg-info">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h6>Số lớp học</h6>
+                                        <h3>@classes.Count</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Grade Level Statistics -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title">Điểm theo khối</h5>
+                            <div class="filter-group">
+                                <select id="gradeLevelFilter" class="form-select form-select-sm" style="width: 150px;">
+                                    <option value="all">Tất cả khối</option>
+                                    @foreach (var g in grades)
+                                    {
+                                        <option value="@g">Khối @g</option>
+                                    }
+                                </select>
+                                <button class="btn btn-primary btn-sm" onclick="filterDiemTheoKhoi()">
+                                    <i class="bi bi-filter"></i> Lọc
+                                </button>
+                            </div>
+                        </div>
+                        <div id="gradeChart" style="min-height: 300px;"></div>
+                        <div id="diemTheoKhoiContainer" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Statistics -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title">Điểm theo lớp</h5>
+                            <div class="filter-group">
+                                <select id="classFilter" class="form-select form-select-sm" style="width: 150px;">
+                                    <option value="all">Tất cả lớp</option>
+                                    @foreach (var c in classes)
+                                    {
+                                        <option value="@c">@c</option>
+                                    }
+                                </select>
+                                <button class="btn btn-primary btn-sm" onclick="filterDiemTrungBinhTheoLop()">
+                                    <i class="bi bi-filter"></i> Lọc
+                                </button>
+                            </div>
+                        </div>
+                        <div id="classChart" style="min-height: 300px;"></div>
+                        <div id="diemTrungBinhTheoLopContainer" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Search Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tra cứu học sinh</h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" id="studentCodeFilter" class="form-control"
+                                        placeholder="Nhập mã hoặc tên học sinh">
+                                    <button class="btn btn-primary" onclick="filterDiemTrungBinhHocSinhTheoMa()">
+                                        <i class="bi bi-search"></i> Tìm kiếm
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="showChartSwitch" checked>
+                                    <label class="form-check-label" for="showChartSwitch">Hiển thị biểu đồ</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="studentSearchResults" class="mt-4">
+                            <div id="studentInfoHeader" class="mb-3 d-none">
+                                <h6 class="fw-bold">Thông tin học sinh</h6>
+                                <div id="studentBasicInfo" class="row"></div>
+                            </div>
+                            
+                            <div id="diemTrungBinhHocSinhContainer" class="table-responsive d-none">
+                                <table class="table table-hover"style="text-align:center;">
+                                    <thead>
+                                        <tr>
+                                            <th>Môn học</th>
+                                            <th>Điểm TB</th>
+                                            <th>Xếp loại</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="studentResultsBody">
+                                        <!-- Results will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="studentChart" style="min-height: 300px;"></div>
+                            <div id="studentNotFound" class="alert alert-warning d-none">
+                                <i class="bi bi-exclamation-triangle"></i> Không tìm thấy học sinh phù hợp
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    // Global chart variables
+    let gradeChart, classChart, studentChart;
+
+    // Initialize grade chart
+    function initGradeChart(data) {
+        const container = $('#gradeChart');
+        container.empty(); // Clear previous content
+        
+        if (!data || data.length === 0) {
+            container.html('<div class="alert alert-info">Không có dữ liệu cho khối này</div>');
+            return;
+        }
+
+        // Prepare data for chart
+        const categories = [];
+        const seriesData = [];
+        
+        data.forEach(item => {
+            categories.push(item.GradeName || 'Khối ' + $('#gradeLevelFilter').val());
+            seriesData.push(item.AverageScore);
+        });
+
+        // Create chart
+        const options = {
+            series: [{
+                name: 'Điểm trung bình',
+                data: seriesData
+            }],
+            chart: {
+                type: 'bar',
+                height: 350
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    horizontal: false,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            xaxis: {
+                categories: categories
+            },
+            yaxis: {
+                min: 0,
+                max: 10,
+                title: {
+                    text: 'Điểm trung bình'
+                }
+            },
+            colors: ['#3b82f6'],
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val.toFixed(2);
+                    }
+                }
+            }
+        };
+
+        if (gradeChart) {
+            gradeChart.destroy();
+        }
+        
+        gradeChart = new ApexCharts(container[0], options);
+        gradeChart.render();
+        
+        // Update info container
+        let html = '<div class="stats-box"><div class="stat-item">';
+        html += `<span class="stat-label">Khối:</span>`;
+        html += `<span class="stat-value">${$('#gradeLevelFilter').val() === 'all' ? 'Tất cả' : 'Khối ' + $('#gradeLevelFilter').val()}</span>`;
+        html += '</div><div class="stat-item">';
+        html += `<span class="stat-label">Điểm TB:</span>`;
+        html += `<span class="stat-value">${data[0].AverageScore.toFixed(2)}</span>`;
+        html += '</div></div>';
+        
+        $('#diemTheoKhoiContainer').html(html);
+    }
+
+    // Initialize class chart
+    function initClassChart(data) {
+        const container = $('#classChart');
+        container.empty(); // Clear previous content
+        
+        if (!data || data.length === 0) {
+            container.html('<div class="alert alert-info">Không có dữ liệu cho lớp này</div>');
+            return;
+        }
+
+        // Prepare data for chart
+        const categories = [];
+        const seriesData = [];
+        
+        data.forEach(item => {
+            categories.push(item.ClassName || $('#classFilter').val());
+            seriesData.push(item.AverageScore);
+        });
+
+        // Create chart
+        const options = {
+            series: [{
+                name: 'Điểm trung bình',
+                data: seriesData
+            }],
+            chart: {
+                type: 'bar',
+                height: 350
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    horizontal: false,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            xaxis: {
+                categories: categories
+            },
+            yaxis: {
+                min: 0,
+                max: 10,
+                title: {
+                    text: 'Điểm trung bình'
+                }
+            },
+            colors: ['#10b981'],
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val.toFixed(2);
+                    }
+                }
+            }
+        };
+
+        if (classChart) {
+            classChart.destroy();
+        }
+        
+        classChart = new ApexCharts(container[0], options);
+        classChart.render();
+        
+        // Update info container
+        let html = '<div class="stats-box"><div class="stat-item">';
+        html += `<span class="stat-label">Lớp:</span>`;
+        html += `<span class="stat-value">${$('#classFilter').val() === 'all' ? 'Tất cả' : $('#classFilter').val()}</span>`;
+        html += '</div><div class="stat-item">';
+        html += `<span class="stat-label">Điểm TB:</span>`;
+        html += `<span class="stat-value">${data[0].AverageScore.toFixed(2)}</span>`;
+        html += '</div></div>';
+        
+        $('#diemTrungBinhTheoLopContainer').html(html);
+    }
+
+    // Initialize student chart
+    function initStudentChart(data) {
+        const container = $('#studentChart');
+        container.empty(); // Clear previous content
+        
+        if (!data || data.length === 0) {
+            container.html('<div class="alert alert-info">Không có dữ liệu điểm</div>');
+            return;
+        }
+
+        // Prepare data for chart
+        const categories = [];
+        const seriesData = [];
+        
+        data.forEach(item => {
+            categories.push(item.SubjectName);
+            seriesData.push(item.AverageScore);
+        });
+
+        // Create chart
+        const options = {
+            series: [{
+                name: 'Điểm trung bình',
+                data: seriesData
+            }],
+            chart: {
+                type: 'line',
+                height: 350,
+                zoom: {
+                    enabled: false
+                }
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            markers: {
+                size: 5
+            },
+            xaxis: {
+                categories: categories
+            },
+            yaxis: {
+                min: 0,
+                max: 10,
+                title: {
+                    text: 'Điểm trung bình'
+                }
+            },
+            colors: ['#f59e0b'],
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val.toFixed(2);
+                    }
+                }
+            }
+        };
+
+        if (studentChart) {
+            studentChart.destroy();
+        }
+        
+        studentChart = new ApexCharts(container[0], options);
+        studentChart.render();
+    }
+
+    // Filter by grade level
+    function filterDiemTheoKhoi() {
+        const grade = $('#gradeLevelFilter').val();
+        
+        $.ajax({
+            url: '/Admin/QLLopHoc/DiemTheoKhoiPartial',
+            type: 'GET',
+            data: { gradeLevelFilter: grade },
+            dataType: 'json',
+            success: function(data) {
+                initGradeChart(data);
+            },
+            error: function() {
+                $('#gradeChart').html('<div class="alert alert-danger">Lỗi khi tải dữ liệu</div>');
+            }
+        });
+    }
+
+    // Filter by class
+    function filterDiemTrungBinhTheoLop() {
+        const lop = $('#classFilter').val();
+        
+        $.ajax({
+            url: '/Admin/QLLopHoc/DiemTrungBinhTheoLopPartial',
+            type: 'GET',
+            data: { classFilter: lop },
+            dataType: 'json',
+            success: function(data) {
+                initClassChart(data);
+            },
+            error: function() {
+                $('#classChart').html('<div class="alert alert-danger">Lỗi khi tải dữ liệu</div>');
+            }
+        });
+    }
+
+    // Search student
+    function filterDiemTrungBinhHocSinhTheoMa() {
+        const code = $('#studentCodeFilter').val().trim();
+        
+        if (!code) {
+            $('#studentNotFound').removeClass('d-none').text('Vui lòng nhập mã hoặc tên học sinh');
+            $('#diemTrungBinhHocSinhContainer').addClass('d-none');
+            $('#studentChart').hide();
+            $('#studentInfoHeader').addClass('d-none');
+            return;
+        }
+
+        $.ajax({
+            url: '/Admin/QLLopHoc/DiemTrungBinhHocSinhPartial',
+            type: 'GET',
+            data: { studentCodeFilter: code },
+            dataType: 'json',
+            success: function(data) {
+                if (!data || data.length === 0) {
+                    $('#studentNotFound').removeClass('d-none').text('Không tìm thấy học sinh phù hợp');
+                    $('#diemTrungBinhHocSinhContainer').addClass('d-none');
+                    $('#studentChart').hide();
+                    $('#studentInfoHeader').addClass('d-none');
+                    return;
+                }
+
+                $('#studentNotFound').addClass('d-none');
+                $('#studentInfoHeader').removeClass('d-none');
+                $('#diemTrungBinhHocSinhContainer').removeClass('d-none');
+
+                // Display student basic info
+                const firstItem = data[0];
+                let infoHtml = `
+                    <div class="col-md-4">
+                        <p><strong>Mã HS:</strong> ${firstItem.StudentCode}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Họ tên:</strong> ${firstItem.FullName}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Lớp:</strong> ${firstItem.ClassName}</p>
+                    </div>
+                `;
+                $('#studentBasicInfo').html(infoHtml);
+
+                // Build table
+                let tableHtml = '';
+                data.forEach(item => {
+                    const rating = getRating(item.AverageScore);
+                    tableHtml += `
+                        <tr>
+                            <td>${item.SubjectName}</td>
+                            <td>${item.AverageScore.toFixed(2)}</td>
+                            <td><span class="badge ${rating.class}">${rating.text}</span></td>
+                        </tr>
+                    `;
+                });
+                $('#studentResultsBody').html(tableHtml);
+
+                // Show/hide chart based on switch
+                if ($('#showChartSwitch').is(':checked')) {
+                    initStudentChart(data);
+                    $('#studentChart').show();
+                } else {
+                    $('#studentChart').hide();
+                }
+            },
+            error: function() {
+                $('#studentNotFound').removeClass('d-none').text('Lỗi khi tải dữ liệu học sinh');
+                $('#diemTrungBinhHocSinhContainer').addClass('d-none');
+                $('#studentChart').hide();
+                $('#studentInfoHeader').addClass('d-none');
+            }
+        });
+    }
+
+    // Helper function to get rating
+    function getRating(score) {
+        if (score >= 8) return { text: 'Giỏi', class: 'bg-success' };
+        if (score >= 6.5) return { text: 'Khá', class: 'bg-primary' };
+        if (score >= 5) return { text: 'Trung bình', class: 'bg-warning' };
+        return { text: 'Yếu', class: 'bg-danger' };
+    }
+
+    // Document ready
+    $(document).ready(function() {
+        // Initial load
+        filterDiemTheoKhoi();
+        filterDiemTrungBinhTheoLop();
+
+        // Event listeners
+        $('#showChartSwitch').change(function() {
+            if ($(this).is(':checked') && !$('#studentNotFound').is(':visible')) {
+                const code = $('#studentCodeFilter').val().trim();
+                if (code) {
+                    filterDiemTrungBinhHocSinhTheoMa();
+                }
+            } else {
+                $('#studentChart').hide();
+            }
+        });
+
+        // Search on Enter key
+        $('#studentCodeFilter').keypress(function(e) {
+            if (e.which === 13) {
+                filterDiemTrungBinhHocSinhTheoMa();
+            }
+        });
+    });
+</script>
+
+<style>
+    .info-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+
+    .icon-box i {
+        font-size: 24px;
+        color: white;
+    }
+
+    .info-content h6 {
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .info-content h3 {
+        margin: 0;
+        font-size: 24px;
+        color: #2c3e50;
+    }
+
+    .stats-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .stat-value {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .badge {
+        font-size: 0.8em;
+        padding: 5px 10px;
+    }
+
+    #studentInfoHeader {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+</style>

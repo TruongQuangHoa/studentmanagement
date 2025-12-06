@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Models;
 using StudentManagement.Areas.Admin.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace StudentManagement.Models
 {
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<IdentityUser>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
@@ -30,6 +32,7 @@ namespace StudentManagement.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             // Cấu hình khóa phụ duy nhất cho StudentID trong tblStudent
             modelBuilder.Entity<tblStudent>()
                 .HasAlternateKey(hs => hs.StudentID);
@@ -51,7 +54,6 @@ namespace StudentManagement.Models
                 .WithMany(x => x.teachersubject)
                 .HasForeignKey(x => x.TeacherID)
                 .HasPrincipalKey(x => x.TeacherID);
-
             // Quan hệ tblTeacherSubject -> tblSubject (N-1)
             modelBuilder.Entity<tblTeacherSubject>()
                 .HasOne(x => x.subject)

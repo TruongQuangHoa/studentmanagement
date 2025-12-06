@@ -1,5 +1,6 @@
 @model StudentManagement.Models.tblSubject
-Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 <main id="main" class="main">
     <div class="pagetitle">
@@ -37,7 +38,6 @@ Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
                         <option value="">--- Tên bộ môn ---</option>
                     </select>
                 </div>
-
                 <div class="form-group col-md-6 mb-3">
                     <label>
                         @Html.CheckBox("IsActive", Model.IsActive)

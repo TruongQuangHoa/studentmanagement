@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using StudentManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
-using StudentManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")] // Bắt buộc: Chỉ Admin mới được vào
     public class GradeController : Controller
     {
         private readonly DataContext _context;
@@ -118,8 +120,7 @@ namespace StudentManagement.Areas.Admin.Controllers
             var grade = await _context.Grades.FindAsync(id);
             if (grade == null)
                 return NotFound();
-
-
+                
             grade.IsActive = !grade.IsActive;
             _context.Update(grade);
             await _context.SaveChangesAsync();

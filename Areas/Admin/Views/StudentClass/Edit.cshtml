@@ -23,6 +23,15 @@
                     <span asp-validation-for="StudentID" class="text-danger"></span>
                 </div>
 
+                <!-- Học kỳ -->
+                <div class="form-group col-md-4 mb-3">
+                    <label>Học kỳ</label>
+                    <select asp-for="YearSemesterID" class="form-control" asp-items="@(ViewBag.smList as SelectList)" required>
+                        <option value="">--- Chọn học kỳ ---</option>
+                    </select>
+                    <span asp-validation-for="YearSemesterID" class="text-danger"></span>
+                </div>
+
                 <!-- Khóa học -->
                 <div class="form-group col-md-4 mb-3">
                     <label>Khóa học</label>
@@ -55,7 +64,8 @@
                 <!-- Hiển thị -->
                 <div class="col-md-6 mb-3">
                     <div class="form-check">
-                        <input type="checkbox" asp-for="IsActive" class="form-check-input" id="IsActive" />
+                        @Html.CheckBox("IsActive", Model.IsActive, new { @class = "form-check-input", id ="IsActive"
+                                                })
                         <label class="form-check-label" for="IsActive">Hiển thị</label>
                     </div>
                 </div>

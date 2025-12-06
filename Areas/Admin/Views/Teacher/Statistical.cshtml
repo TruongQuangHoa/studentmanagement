@@ -1,0 +1,865 @@
+@{
+    ViewData["Title"] = "Thống Kê Giáo viên";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle d-flex justify-content-between align-items-center">
+        <h1><i class="bi bi-bar-chart-fill"></i> Thống Kê Giáo Viên</h1>
+        <div>
+            <a href="@Url.Action("Index", "QLGiaoVien", new { area = "Admin" })" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại
+            </a>
+            <button class="btn btn-primary ms-2" onclick="printStatistics()">
+                <i class="bi bi-printer me-1"></i> In báo cáo
+            </button>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Summary Cards -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng Giáo Viên</h5>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-primary">
+                                <i class="bi bi-people-fill text-white"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>@ViewBag.TotalTeachers</h6>
+                                <span class="text-muted small">Giáo viên</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showTeacherList('all')">
+                            <i class="bi bi-list-ul me-1"></i> Chi tiết
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">Dân Tộc Thiểu Số</h5>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-warning">
+                                <i class="bi bi-flag-fill text-white"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>@ViewBag.TotalMinorityTeachers</h6>
+                             <span class="text-muted small">
+    @((ViewBag.TotalTeachers > 0 ? Math.Round((double)ViewBag.TotalMinorityTeachers / ViewBag.TotalTeachers * 100, 1) : 0))% tổng số
+</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showTeacherList('minority')">
+                            <i class="bi bi-list-ul me-1"></i> Chi tiết
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">Đảng Viên</h5>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-danger">
+                                <i class="bi bi-star-fill text-white"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>@(ViewBag.PartyStats.ContainsKey("Đảng viên") ? ViewBag.PartyStats["Đảng viên"] : 0)</h6>
+                                <span class="text-muted small">Giáo viên</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showTeacherList('party', 'Đảng viên')">
+                            <i class="bi bi-list-ul me-1"></i> Chi tiết
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">Độ Tuổi Trung Bình</h5>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-success">
+                                <i class="bi bi-calendar-heart text-white"></i>
+                            </div>
+                            <div class="ps-3">
+                                @{
+                                    var ageStats = ViewBag.AgeStats as Dictionary<string, int>;
+                                    var totalAge = 0;
+                                    var countAge = 0;
+                                    if (ageStats != null)
+                                    {
+                                        foreach (var item in ageStats)
+                                        {
+                                            var range = item.Key.Split('-');
+                                            if (range.Length == 2 && int.TryParse(range[0], out int min) && int.TryParse(range[1], out int max))
+                                            {
+                                                totalAge += ((min + max) / 2) * item.Value;
+                                                countAge += item.Value;
+                                            }
+                                        }
+                                    }
+                                    var avgAge = countAge > 0 ? totalAge / countAge : 0;
+                                }
+                                <h6>@avgAge tuổi</h6>
+                                <span class="text-muted small">@countAge giáo viên có thông tin</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showAgeFilterModal()">
+                            <i class="bi bi-filter me-1"></i> Lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Detailed Statistics -->
+    <div class="row mt-4">
+        <!-- Gender Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Phân Bổ Giới Tính</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="genderDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gender-ambiguous"></i> Lọc
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="genderDropdown">
+                                <li><a class="dropdown-item" href="#" onclick="showTeacherList('gender', 'Nam')">Nam</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="showTeacherList('gender', 'Nữ')">Nữ</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="showTeacherList('gender', 'Khác')">Khác</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="genderChart" style="min-height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Age Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Phân Bổ Độ Tuổi</h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="showAgeFilterModal()">
+                            <i class="bi bi-filter me-1"></i> Lọc
+                        </button>
+                    </div>
+                    <div id="ageChart" style="min-height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Phân Bổ Theo Bộ Môn</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="departmentDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-building"></i> Lọc
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="departmentDropdown">
+                                @if (ViewBag.BoMonStats != null)
+                                {
+                                    foreach (var dept in ViewBag.BoMonStats.Keys)
+                                    {
+                                        <li><a class="dropdown-item" href="#" onclick="showTeacherList('department', '@dept')">@dept</a></li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="departmentChart" style="min-height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Religion Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Phân Bổ Tôn Giáo</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="religionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-heart-fill"></i> Lọc
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="religionDropdown">
+                                @if (ViewBag.Religions != null)
+                                {
+                                    foreach (var religion in ViewBag.Religions.Keys)
+                                    {
+                                        <li><a class="dropdown-item" href="#" onclick="showTeacherList('religion', '@religion')">@religion</a></li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="religionChart" style="min-height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Trạng Thái Giảng Dạy</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-journal-check"></i> Lọc
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                                @if (ViewBag.StatusGV != null)
+                                {
+                                    foreach (var status in ViewBag.StatusGV.Keys)
+                                    {
+                                        <li><a class="dropdown-item" href="#" onclick="showTeacherList('status', '@status')">@status</a></li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="statusChart" style="min-height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Province Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Phân Bổ Theo Tỉnh/TP</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="provinceDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-geo-alt-fill"></i> Lọc
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="provinceDropdown">
+                                @if (ViewBag.ProvinceStats != null)
+                                {
+                                    foreach (var province in ViewBag.ProvinceStats.Keys)
+                                    {
+                                        <li><a class="dropdown-item" href="#" onclick="showTeacherList('province', '@province')">@province</a></li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="provinceChart" style="min-height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher List Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Danh Sách Giáo Viên</h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-success" onclick="exportToExcel()">
+                                <i class="bi bi-file-excel me-1"></i> Xuất Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div id="teacherListContainer" class="mt-3">
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-info-circle-fill fs-1"></i>
+                            <p class="mt-3">Chọn một tiêu chí thống kê để xem danh sách giáo viên chi tiết</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Age Filter Modal -->
+    <div class="modal fade" id="ageFilterModal" tabindex="-1" aria-labelledby="ageFilterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ageFilterModalLabel">Lọc Theo Độ Tuổi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="ageRangeSelect" class="form-label">Chọn khoảng tuổi:</label>
+                        <select class="form-select" id="ageRangeSelect">
+                            <option value="">Tất cả độ tuổi</option>
+                            @if (ViewBag.AgeStats != null)
+                            {
+                                foreach (var ageRange in ViewBag.AgeStats.Keys)
+                                {
+                                    <option value="@ageRange">@ageRange tuổi</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="applyAgeFilter()">Áp dụng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        // Initialize charts when page loads
+        $(document).ready(function() {
+            renderGenderChart();
+            renderAgeChart();
+            renderDepartmentChart();
+            renderReligionChart();
+            renderStatusChart();
+            renderProvinceChart();
+        });
+
+        function renderGenderChart() {
+            var genderData = @Html.Raw(Json.Serialize(ViewBag.GenderStats));
+            var labels = Object.keys(genderData);
+            var series = Object.values(genderData);
+
+            var options = {
+                series: series,
+                chart: {
+                    type: 'donut',
+                    height: 350
+                },
+                labels: labels,
+                colors: ['#4e73df', '#1cc88a', '#36b9cc'],
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }],
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: 'Tổng số',
+                                    color: '#6c757d'
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#genderChart"), options);
+            chart.render();
+        }
+
+        function renderAgeChart() {
+            var ageData = @Html.Raw(Json.Serialize(ViewBag.AgeStats));
+            var labels = Object.keys(ageData).map(range => range + ' tuổi');
+            var series = Object.values(ageData);
+
+            var options = {
+                series: [{
+                    name: "Số giáo viên",
+                    data: series
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: true,
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ['#5a5c69'],
+                xaxis: {
+                    categories: labels,
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val + " giáo viên";
+                        }
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#ageChart"), options);
+            chart.render();
+        }
+
+        function renderDepartmentChart() {
+            var deptData = @Html.Raw(Json.Serialize(ViewBag.BoMonStats));
+            var labels = Object.keys(deptData);
+            var series = Object.values(deptData);
+
+            var options = {
+                series: [{
+                    name: "Số giáo viên",
+                    data: series
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: false,
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ['#1cc88a'],
+                xaxis: {
+                    categories: labels,
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val + " giáo viên";
+                        }
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#departmentChart"), options);
+            chart.render();
+        }
+
+        function renderReligionChart() {
+            var religionData = @Html.Raw(Json.Serialize(ViewBag.ReligionStats));
+            var labels = Object.keys(religionData);
+            var series = Object.values(religionData);
+
+            var options = {
+                series: series,
+                chart: {
+                    type: 'pie',
+                    height: 350
+                },
+                labels: labels,
+                colors: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }],
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: 'Tổng số',
+                                    color: '#6c757d'
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#religionChart"), options);
+            chart.render();
+        }
+
+        function renderStatusChart() {
+            var statusData = @Html.Raw(Json.Serialize(ViewBag.StatusGV));
+            var labels = Object.keys(statusData);
+            var series = Object.values(statusData);
+
+            var options = {
+                series: series,
+                chart: {
+                    type: 'radialBar',
+                    height: 350
+                },
+                plotOptions: {
+                    radialBar: {
+                        dataLabels: {
+                            name: {
+                                fontSize: '22px',
+                            },
+                            value: {
+                                fontSize: '16px',
+                            },
+                            total: {
+                                show: true,
+                                label: 'Tổng',
+                                formatter: function (w) {
+                                    return series.reduce((a, b) => a + b, 0);
+                                }
+                            }
+                        }
+                    }
+                },
+                labels: labels,
+                colors: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e'],
+            };
+
+            var chart = new ApexCharts(document.querySelector("#statusChart"), options);
+            chart.render();
+        }
+
+        function renderProvinceChart() {
+            var provinceData = @Html.Raw(Json.Serialize(ViewBag.ProvinceStats));
+            var labels = Object.keys(provinceData);
+            var series = Object.values(provinceData);
+
+            var options = {
+                series: [{
+                    name: "Số giáo viên",
+                    data: series
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: false,
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ['#f6c23e'],
+                xaxis: {
+                    categories: labels,
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val + " giáo viên";
+                        }
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(document.querySelector("#provinceChart"), options);
+            chart.render();
+        }
+
+        function showAgeFilterModal() {
+            $('#ageFilterModal').modal('show');
+        }
+
+        function applyAgeFilter() {
+            var ageRange = $('#ageRangeSelect').val();
+            if (ageRange) {
+                showTeacherList('age', ageRange);
+            } else {
+                showTeacherList('all');
+            }
+            $('#ageFilterModal').modal('hide');
+        }
+
+        function showTeacherList(filter, filterValue = null) {
+            var url = '@Url.Action("TeacherListPartial", "QLGiaoVien", new { area = "Admin" })';
+            var params = { filter: filter };
+            
+            if (filterValue) {
+                switch(filter) {
+                    case 'religion':
+                        params.religionFilter = filterValue;
+                        break;
+                    case 'status':
+                        params.statusFilter = filterValue;
+                        break;
+                    case 'party':
+                        params.partyFilter = filterValue;
+                        break;
+                    case 'gender':
+                        params.genderFilter = filterValue;
+                        break;
+                    case 'department':
+                        params.departmentFilter = filterValue;
+                        break;
+                    case 'age':
+                        params.ageRangeFilter = filterValue;
+                        break;
+                    case 'province':
+                        params.provinceFilter = filterValue;
+                        break;
+                }
+            }
+
+            $.get(url, params, function (data) {
+                if (data && data.length > 0) {
+                    $('#teacherListContainer').html(generateTeacherTable(data, filter, filterValue));
+                } else {
+                    $('#teacherListContainer').html(`
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Không tìm thấy giáo viên nào phù hợp với tiêu chí này.
+                        </div>
+                    `);
+                }
+            }).fail(function() {
+                $('#teacherListContainer').html(`
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-octagon-fill me-2"></i> Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.
+                    </div>
+                `);
+            });
+        }
+
+        function generateTeacherTable(data, filter, filterValue) {
+            var table = `
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã GV</th>
+                                <th>Họ và Tên</th>
+                                <th>Ngày sinh</th>
+                                <th>Giới tính</th>
+                                <th>Bộ môn</th>
+                                <th>Trạng thái</th>
+                                <th>Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+            if (Array.isArray(data)) {
+                for (var i = 0; i < data.length; i++) {
+                    table += `
+                        <tr>
+                            <td>${data[i].TeacherID}</td>
+                            <td>${data[i].FullName}</td>
+                            <td>${data[i].Birth || 'Không rõ'}</td>
+                            <td>${data[i].Gender || 'Không rõ'}</td>
+                            <td>${data[i].Department || 'Không rõ'}</td>
+                            <td><span class="badge ${getStatusBadgeClass(data[i].StatusTeacher)}">${data[i].StatusTeacher || 'Không rõ'}</span></td>
+                            <td class="text-center">
+                                <a href="@Url.Action("Details", "QLGiaoVien", new { area = "Admin" })/${data[i].TeacherID}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                            </td>
+                        </tr>`;
+                }
+            }
+
+            table += `
+                        </tbody>
+                    </table>
+                    <div class="mt-3 text-muted">
+                        <i class="bi bi-info-circle-fill me-1"></i> Tổng cộng ${data.length} giáo viên
+                        ${filterValue ? `theo tiêu chí: ${filterValue}` : ''}
+                    </div>
+                </div>`;
+
+            return table;
+        }
+
+        function getStatusBadgeClass(status) {
+            if (!status) return 'bg-secondary';
+            
+            status = status.toLowerCase();
+            if (status.includes('đang giảng dạy') || status.includes('hoạt động')) return 'bg-success';
+            if (status.includes('nghỉ hưu')) return 'bg-info';
+            if (status.includes('nghỉ việc')) return 'bg-danger';
+            if (status.includes('tạm nghỉ')) return 'bg-warning';
+            return 'bg-secondary';
+        }
+
+        function exportToExcel() {
+            var table = $('#teacherListContainer table');
+            if (table.length === 0) {
+                toastr.warning('Không có dữ liệu để xuất Excel');
+                return;
+            }
+
+            // Get table data
+            var rows = [];
+            $(table).find('tr').each(function (i, row) {
+                var rowData = [];
+                $(row).find('th, td').each(function (j, cell) {
+                    // Skip action column
+                    if (j !== $(row).find('td').length - 1) {
+                        rowData.push($(cell).text().trim());
+                    }
+                });
+                rows.push(rowData);
+            });
+
+            // Create workbook
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, "DanhSachGiaoVien");
+
+            // Export to file
+            var filterText = $(table).next('div').text().trim();
+            var fileName = 'DanhSachGiaoVien_' + filterText.replace(/[^a-zA-Z0-9]/g, '_') + '.xlsx';
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function printStatistics() {
+            var printContent = `
+                <div class="container">
+                    <div class="text-center mb-4">
+                        <h3>BÁO CÁO THỐNG KÊ GIÁO VIÊN</h3>
+                        <p>Ngày xuất báo cáo: ${new Date().toLocaleDateString('vi-VN')}</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <p><strong>Tổng số giáo viên:</strong> ${@ViewBag.TotalTeachers}</p>
+                            <p><strong>Giáo viên dân tộc thiểu số:</strong> ${@ViewBag.TotalMinorityTeachers}</p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Đảng viên:</strong> ${ViewBag.PartyStats && ViewBag.PartyStats['Đảng viên'] ? ViewBag.PartyStats['Đảng viên'] : 0}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Phân bổ giới tính</h5>
+                        <div id="printGenderChart" style="height: 300px;"></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Phân bổ độ tuổi</h5>
+                        <div id="printAgeChart" style="height: 300px;"></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Phân bổ bộ môn</h5>
+                        <div id="printDepartmentChart" style="height: 300px;"></div>
+                    </div>
+                    
+                    <div class="text-muted mt-4">
+                        <p>Báo cáo được tạo tự động từ hệ thống</p>
+                    </div>
+                </div>
+            `;
+            
+            var originalContent = document.body.innerHTML;
+            document.body.innerHTML = printContent;
+            
+            // Render charts for print
+            renderPrintCharts();
+            
+            setTimeout(function() {
+                window.print();
+                document.body.innerHTML = originalContent;
+                location.reload();
+            }, 1000);
+        }
+
+        function renderPrintCharts() {
+            // Gender chart for print
+            var genderData = @Html.Raw(Json.Serialize(ViewBag.GenderStats));
+            var genderLabels = Object.keys(genderData);
+            var genderSeries = Object.values(genderData);
+            
+            var genderOptions = {
+                series: genderSeries,
+                chart: {
+                    type: 'pie',
+                    height: '100%'
+                },
+                labels: genderLabels,
+                colors: ['#4e73df', '#1cc88a', '#36b9cc'],
+            };
+            
+            var genderChart = new ApexCharts(document.querySelector("#printGenderChart"), genderOptions);
+            genderChart.render();
+            
+            // Age chart for print
+            var ageData = @Html.Raw(Json.Serialize(ViewBag.AgeStats));
+            var ageLabels = Object.keys(ageData).map(range => range + ' tuổi');
+            var ageSeries = Object.values(ageData);
+            
+            var ageOptions = {
+                series: [{
+                    name: "Số giáo viên",
+                    data: ageSeries
+                }],
+                chart: {
+                    type: 'bar',
+                    height: '100%'
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                    }
+                },
+                xaxis: {
+                    categories: ageLabels,
+                }
+            };
+            
+            var ageChart = new ApexCharts(document.querySelector("#printAgeChart"), ageOptions);
+            ageChart.render();
+            
+            // Department chart for print
+            var deptData = @Html.Raw(Json.Serialize(ViewBag.BoMonStats));
+            var deptLabels = Object.keys(deptData);
+            var deptSeries = Object.values(deptData);
+            
+            var deptOptions = {
+                series: [{
+                    name: "Số giáo viên",
+                    data: deptSeries
+                }],
+                chart: {
+                    type: 'bar',
+                    height: '100%'
+                },
+                xaxis: {
+                    categories: deptLabels,
+                }
+            };
+            
+            var deptChart = new ApexCharts(document.querySelector("#printDepartmentChart"), deptOptions);
+            deptChart.render();
+        }
+    </script>

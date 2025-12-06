@@ -1,141 +1,72 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using StudentManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using StudentManagement.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class StudentController : Controller
     {
         private readonly DataContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public StudentController(DataContext context)
+        public StudentController(DataContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
-        public IActionResult Index(int? classID = null)
+        // --- 1. INDEX (Đã thêm logic Tìm kiếm và Lọc lớp) ---
+        public IActionResult Index(int? classId, string query)
         {
-            // ViewBag.IsAdmin = Functions.IsAdmin(HttpContext);
-            // ViewBag.IsTeacher = Functions.IsTeacher(HttpContext);
-
-            var stList = _context.Students
-                .Include(s => s.studentclass)
+            // Eager load dữ liệu lớp
+            var students = _context.Students
+                .Include(s => s.studentclass!)
                     .ThenInclude(st => st._class)
-                        .ThenInclude(l => l.grade)
                 .AsQueryable();
 
-            if (classID.HasValue)
+            // Lọc theo Lớp
+            if (classId.HasValue && classId > 0)
             {
-                stList = stList.Where(s => s.studentclass.Any(st => st.ClassID == classID.Value && st.IsActive));
-                ViewBag.SelectedClass = classID.Value.ToString();
-            }
-            else
-            {
-                ViewBag.SelectedClass = "";
+                students = students.Where(s => s.studentclass!.Any(st => st.ClassID == classId && st.IsActive));
+                ViewBag.CurrentClassId = classId;
             }
 
-            return View(stList.OrderBy(h => h.ID).ToList());
+            // Lọc theo Từ khóa tìm kiếm
+            if (!string.IsNullOrEmpty(query))
+            {
+                students = students.Where(s => s.FullName.Contains(query) || s.StudentID.Contains(query));
+                ViewBag.CurrentQuery = query;
+            }
+
+            // Load dropdown lớp học cho Form lọc
+            LoadData();
+            
+            return View(students.OrderByDescending(h => h.ID).ToList());
         }
 
-        // public IActionResult ExportToExcel(int? classId)
-        // {
-        //     try
-        //     {
-        //         var query = _context.QLHocSinhs
-        //             .Include(h => h.HocSinhLopHocs)
-        //                 .ThenInclude(hsl => hsl.lopHoc)
-        //             .Where(h => h.HocSinhLopHocs.Any(hsl => hsl.IsActive))
-        //             .AsQueryable();
-
-        //         string fileLabel = "toantruong";
-
-        //         if (classId.HasValue && classId.Value > 0)
-        //         {
-        //             query = query.Where(h => h.HocSinhLopHocs.Any(hsl => hsl.ClassID == classId.Value && hsl.IsActive));
-        //             var className = _context.QLLopHocs
-        //                 .Where(l => l.ClassID == classId)
-        //                 .Select(l => l.ClassName)
-        //                 .FirstOrDefault();
-        //             fileLabel = className?.Replace(" ", "_") ?? $"Lop_{classId}";
-        //         }
-
-        //         var rawData = query.ToList();
-
-        //         if (!rawData.Any())
-        //             return Content("Không có học sinh nào để xuất Excel.");
-
-        //         var data = rawData.Select((h, index) => new
-        //         {
-        //             STT = index + 1,
-        //             StudentID = h.StudentID,
-        //             FullName = h.FullName,
-        //             Birth = h.Birth?.ToString("dd/MM/yyyy") ?? "Không có dữ liệu",
-        //             Gender = h.Gender,
-        //             Address = h.Address,
-        //             ClassName = h.HocSinhLopHocs.FirstOrDefault(hsl => hsl.IsActive)?.lopHoc?.ClassName ?? "Chưa có lớp",
-        //             Nation = h.Nation,
-        //             Religion = h.Religion,
-        //             NumberPhone = h.NumberPhone
-        //         }).ToList();
-
-        //         var stream = new MemoryStream();
-        //         using (var package = new ExcelPackage(stream))
-        //         {
-        //             var sheet = package.Workbook.Worksheets.Add($"DanhSach_{fileLabel}");
-        //             sheet.Cells.LoadFromCollection(data, true);
-        //             sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
-        //             package.Save();
-        //         }
-
-        //         stream.Position = 0;
-        //         var fileName = $"DanhSachHocSinh_{fileLabel}.xlsx";
-        //         return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         System.Diagnostics.Debug.WriteLine($"Lỗi khi xuất Excel: {ex.Message}");
-        //         return Content("Đã xảy ra lỗi khi xuất file Excel.");
-        //     }
-        // }
-
-        public IActionResult Delete(int? id)
-        {
-            if (id == null || id == 0)
-                return NotFound();
-            var st = _context.Students.Find(id);
-            if (st == null)
-                return NotFound();
-            return View(st);
-        }
-        [HttpPost]
-        public IActionResult Delete(int id)
-        {
-            var delStudent = _context.Students.Find(id);
-            if (delStudent == null)
-                return NotFound();
-
-            var classRelations = _context.StudentClasses.Where(st => st.StudentID == delStudent.StudentID);
-            _context.StudentClasses.RemoveRange(classRelations);
-
-            _context.Students.Remove(delStudent);
-            _context.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
+        // --- 2. CREATE (GET) - HIỂN THỊ FORM (QUAN TRỌNG: SỬA LỖI 405) ---
+        [HttpGet]
         public IActionResult Create()
         {
+            LoadData(); // Load danh sách lớp để chọn
             return View();
         }
+
+        // --- 3. CREATE (POST) - XỬ LÝ LƯU ---
         [HttpPost]
-        public IActionResult Create(tblStudent st, int? ClassID)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(tblStudent student, int? ClassID) // Thêm ClassID để lưu lớp luôn
         {
             // Kiểm tra xem StudentID đã tồn tại chưa
             if (_context.Students.Any(t => t.StudentID == st.StudentID))
@@ -146,44 +77,84 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Students.Add(st);
-                if (ClassID.HasValue && ClassID > 0)
+                // A. TẠO TÀI KHOẢN IDENTITY
+                var user = new IdentityUser
                 {
-                    var sc = new tblStudentClass
-                    {
-                        StudentID = st.StudentID,
-                        ClassID = ClassID.Value,
-                        IsActive = true
-                    };
-                    _context.StudentClasses.Add(sc);
-                }
+                    UserName = student.StudentID,
+                    Email = (student.StudentID) + "@truongthpt.edu.vn"
+                };
 
-                _context.SaveChanges();
-                return RedirectToAction("Index");
+                var result = await _userManager.CreateAsync(user, "Hocsinh@123");
+
+                if (result.Succeeded)
+                {
+                    // Kiểm tra xem Role "Student" đã có trong DB chưa
+                    if (!await _roleManager.RoleExistsAsync("Student"))
+                    {
+                        // Nếu chưa có thì tạo mới ngay lập tức
+                        await _roleManager.CreateAsync(new IdentityRole("Student"));
+                    }
+                    
+                    await _userManager.AddToRoleAsync(user, "Student");
+
+                    // B. LƯU HỒ SƠ HỌC SINH
+                    student.IsActive = true;
+                    _context.Add(student);
+                    await _context.SaveChangesAsync();
+
+                    // C. LƯU PHÂN LỚP (Nếu có chọn lớp)
+                    if (ClassID.HasValue && ClassID > 0)
+                    {
+                        var relation = new tblStudentClass
+                        {
+                            StudentID = student.StudentID,
+                            ClassID = ClassID.Value,
+                            IsActive = true
+                        };
+                        _context.StudentClasses.Add(relation);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", "Lỗi tạo tài khoản: " + error.Description);
+                    }
+                }
             }
-            return View(st);
+            
+            LoadData(); // Load lại dropdown nếu lỗi
+            return View(student);
         }
+
+        // --- 4. EDIT (GET) ---
         public IActionResult Edit(int? id)
         {
-            if (id == null || id == 0)
-                return NotFound();
+            if (id == null || id == 0) return NotFound();
 
-           var student = _context.Students
-                .Include(s => s.studentclass)
-                .FirstOrDefault(s => s.ID == id);
+            var student = _context.Students
+                 .Include(s => s.studentclass)
+                 .FirstOrDefault(s => s.ID == id);
 
-            if (student == null)
-                return NotFound();
+            if (student == null) return NotFound();
 
-            var currentClass = student.studentclass.FirstOrDefault(st => st.IsActive);
+            // Tìm lớp hiện tại đang học (IsActive = true)
+            var currentClass = student.studentclass?.FirstOrDefault(st => st.IsActive);
             if (currentClass != null)
             {
                 ViewBag.CurrentClassID = currentClass.ClassID;
             }
 
+            LoadData();
             return View(student);
         }
+
+        // --- 5. EDIT (POST) ---
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(tblStudent st, int? ClassID)
         {   
             // Kiểm tra trùng lặp StudentID, nhưng cho phép chính bản ghi đang chỉnh sửa
@@ -199,27 +170,35 @@ namespace StudentManagement.Areas.Admin.Controllers
             {
                 _context.Update(st);
 
+                // Xử lý cập nhật lớp học
                 var currentRelation = _context.StudentClasses
                     .FirstOrDefault(sc => sc.StudentID == st.StudentID && sc.IsActive);
 
                 if (ClassID.HasValue && ClassID > 0)
                 {
-                    if (currentRelation != null)
+                    // Nếu lớp chọn MỚI khác lớp CŨ
+                    if (currentRelation == null || currentRelation.ClassID != ClassID)
                     {
-                        currentRelation.IsActive = false;
-                        _context.Update(currentRelation);
-                    }
+                        // 1. Hủy lớp cũ (nếu có)
+                        if (currentRelation != null)
+                        {
+                            currentRelation.IsActive = false;
+                            _context.Update(currentRelation);
+                        }
 
-                    var newRelation = new tblStudentClass
-                    {
-                        StudentID = st.StudentID,
-                        ClassID = ClassID.Value,
-                        IsActive = true
-                    };
-                    _context.StudentClasses.Add(newRelation);
+                        // 2. Thêm lớp mới
+                        var newRelation = new tblStudentClass
+                        {
+                            StudentID = st.StudentID,
+                            ClassID = ClassID.Value,
+                            IsActive = true
+                        };
+                        _context.StudentClasses.Add(newRelation);
+                    }
                 }
                 else if (currentRelation != null)
                 {
+                    // Nếu người dùng bỏ chọn lớp -> Hủy lớp hiện tại
                     currentRelation.IsActive = false;
                     _context.Update(currentRelation);
                 }
@@ -227,19 +206,67 @@ namespace StudentManagement.Areas.Admin.Controllers
                 _context.SaveChanges();
                 return RedirectToAction("Index");
             }
+
+            LoadData();
             return View(st);
         }
 
+        // --- 6. DELETE ---
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0) return NotFound();
+            var st = _context.Students.Find(id);
+            if (st == null) return NotFound();
+            return View(st);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var delStudent = _context.Students.Find(id);
+            if (delStudent == null) return NotFound();
+
+            // Xóa quan hệ lớp học trước
+            var classRelations = _context.StudentClasses.Where(st => st.StudentID == delStudent.StudentID);
+            _context.StudentClasses.RemoveRange(classRelations);
+
+            // Xóa học sinh
+            _context.Students.Remove(delStudent);
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        // --- 7. TOGGLE STATUS ---
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(int id)
         {
             var student = await _context.Students.FindAsync(id);
-            if (student == null)
-                return NotFound();
+            if (student == null) return NotFound();
+            
             student.IsActive = !student.IsActive;
             _context.Update(student);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // --- HELPER: LOAD DATA CHO DROPDOWN ---
+        public void LoadData()
+        {
+            var clList = _context.Classes
+                .Include(cl => cl.grade)
+                .Where(cl => cl.IsActive == true)
+                .Select(cl => new
+                {
+                    cl.ClassID,
+                    // Sửa tên property cho khớp với SelectList bên dưới
+                    ThongTin = cl.ClassName + (cl.grade != null ? " | Khối: " + cl.grade.GradeName : "")
+                })
+                .ToList();
+
+            // Sửa tên ViewBag thành LopHocList để khớp với View Index.cshtml
+            // Sửa tham số thứ 3 thành "ThongTin" (khớp với Select ở trên)
+            ViewBag.LopHocList = new SelectList(clList, "ClassID", "ThongTin");
         }
     }
 }

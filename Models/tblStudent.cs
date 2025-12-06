@@ -12,8 +12,8 @@ namespace StudentManagement.Models
     {
         [Key]
         public int ID { get; set; }
-        public string StudentID { get; set; }
-        public string FullName { get; set; }
+        public string? StudentID { get; set; }
+        public string? FullName { get; set; }
         public DateTime? Birth { get; set; }
         public string? Gender { get; set; }
         public string? Address { get; set; }
@@ -28,6 +28,9 @@ namespace StudentManagement.Models
         public string? Province { get; set; }
         public string? Nationality { get; set; }
 
-        public virtual ICollection<tblStudentClass>? studentclass { get; set; }
+        public virtual ICollection<tblStudentClass>? studentclass { get; set; } = new List<tblStudentClass>();
+        // public virtual ICollection<QLThanNhan> ThanNhans { get; set; } = new List<QLThanNhan>();
+        // public virtual ICollection<QLHosohoa> Hosohoas { get; set; } = new List<QLHosohoa>();
+
     }
 }

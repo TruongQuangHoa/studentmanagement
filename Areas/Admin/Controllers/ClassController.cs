@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using StudentManagement.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+    // [Area("Admin")]
+    // [Authorize(Roles = "Admin")]
     public class ClassController : Controller
     {
         private readonly DataContext _context;
@@ -78,7 +80,7 @@ namespace StudentManagement.Areas.Admin.Controllers
             for (int i = 0; i < grades.Count; i++)
             {
                 var grade = grades[i];
-                int startYear = cohort.StartYear.Value + i;
+                int startYear = (cohort.StartYear ?? DateTime.Now.Year) + i;
 
                 var newClass = new tblClass
                 {
@@ -189,5 +191,141 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             ViewBag.chList = new SelectList(chList, "CohortID", "Display");
         }
+
+        // Thống kê
+    //     public IActionResult ThongKe()
+    //     {
+    //         // Tổng thống kê điểm toàn khối (coi như toàn trường)
+    //         var allGrades = _context.QLDiems.ToList();
+    //         var totalExams = allGrades.Count;
+    //         var sumOfAllScores = allGrades.Sum(d => d.AverageScore);
+    //         var averageScoreAll = totalExams > 0 ? (double)sumOfAllScores / totalExams : 0;
+
+    //         // Thống kê điểm theo từng khối (for dropdown)
+    //         var gradeLevelStats = _context.QLKhois.Select(k => k.GradeName).Distinct().ToList();
+
+    //         // Thống kê điểm trung bình theo từng lớp (for dropdown)
+    //         var classStats = _context.QLLopHocs.Select(l => l.ClassName).Distinct().ToList();
+
+    //         ViewBag.AverageScoreAll = averageScoreAll;
+    //         ViewBag.GradeLevels = gradeLevelStats;
+    //         ViewBag.Classes = classStats;
+    //         ViewBag.TotalExams = totalExams;
+
+
+
+    //         return View();
+    //     }
+
+
+    //     public IActionResult DiemTheoKhoiPartial(string gradeLevelFilter)
+    //     {
+    //         if (string.IsNullOrWhiteSpace(gradeLevelFilter) || gradeLevelFilter == "all")
+    //         {
+    //             return Json(new List<object> { new {
+    //         GradeName = "Toàn trường",
+    //         AverageScore = _context.QLDiems.Average(d => (double?)d.AverageScore) ?? 0
+    //     }});
+    //         }
+
+    //         var gradeAvg = _context.QLDiems
+    //  .Join(_context.QLMonHocs, d => d.SubjectID, m => m.SubjectID, (d, m) => new { d, m })
+    //  .GroupBy(x => x.m.SubjectName) // Nhóm theo tên môn học
+    //  .Select(g => new
+    //  {
+    //      SubjectName = g.Key,
+    //      AverageScore = g.Average(x => x.d.AverageScore)
+    //  })
+    //  .ToList();
+
+    //         return Json(gradeAvg);
+    //     }
+
+    //     public IActionResult DiemTrungBinhTheoLopPartial(string classFilter)
+    //     {
+    //         if (string.IsNullOrWhiteSpace(classFilter) || classFilter == "all")
+    //         {
+    //             return Json(new List<object> { new {
+    //         ClassName = "Tất cả lớp",
+    //         AverageScore = _context.QLDiems.Average(d => (double?)d.AverageScore) ?? 0
+    //     }});
+    //         }
+
+    //         var classAvg = _context.QLDiems
+    //   .Join(_context.QLHocSinhs, d => d.StudentID, hs => hs.StudentID, (d, hs) => new { d, hs })
+    //   .Join(_context.QLHocSinhLopHocs.Where(hsl => hsl.IsActive), x => x.hs.StudentID, hsl => hsl.StudentID, (x, hsl) => new { x.d, hsl })
+    //   .Join(_context.QLLopHocs, x => x.hsl.ClassID, lh => lh.ClassID, (x, lh) => new { x.d, lh })
+    //   .Where(x => x.lh.ClassName == classFilter)
+    //   .GroupBy(x => x.lh.ClassName)
+    //   .Select(g => new
+    //   {
+    //       ClassName = g.Key,
+    //       AverageScore = g.Average(x => x.d.AverageScore)
+    //   })
+    //   .ToList();
+
+    //         return Json(classAvg);
+
+    //     }
+    //     public IActionResult DiemTrungBinhHocSinhPartial(string studentCodeFilter)
+    //     {
+    //         try
+    //         {
+    //             if (string.IsNullOrWhiteSpace(studentCodeFilter))
+    //                 return Content(string.Empty);
+
+    //             var filter = studentCodeFilter.Trim().ToLower();
+
+    //             var studentScores = _context.QLDiems
+    // .Join(_context.QLHocSinhs,
+    //       d => d.StudentID.ToString(),
+    //       hs => hs.StudentID.ToString(),
+    //       (d, hs) => new { d, hs })
+    // .Where(x =>
+    //     x.hs.StudentID.ToString().ToLower().Contains(filter) ||
+    //     x.hs.FullName.ToLower().Contains(filter))
+    // .Join(_context.QLMonHocs,
+    //       x => x.d.SubjectID,
+    //       m => m.SubjectID,
+    //       (x, m) => new { x.hs, x.d, m })
+    // // Join bảng trung gian QLHocSinhLopHoc
+    // .Join(_context.QLHocSinhLopHocs.Where(hsl => hsl.IsActive),
+    //       temp => temp.hs.StudentID,
+    //       hsl => hsl.StudentID,
+    //       (temp, hsl) => new { temp.hs, temp.d, temp.m, hsl })
+    // // Join lớp học
+    // .Join(_context.QLLopHocs,
+    //       temp => temp.hsl.ClassID,
+    //       lop => lop.ClassID,
+    //       (temp, lop) => new
+    //       {
+    //           temp.hs.StudentID,
+    //           temp.hs.FullName,
+    //           temp.m.SubjectName,
+    //           temp.d.AverageScore,
+    //           ClassName = lop.ClassName
+    //       })
+    // .GroupBy(x => new { x.StudentID, x.FullName, x.SubjectName, x.ClassName })
+    // .Select(g => new
+    // {
+    //     StudentCode = g.Key.StudentID.ToString(),
+    //     FullName = g.Key.FullName,
+    //     SubjectName = g.Key.SubjectName,
+    //     ClassName = g.Key.ClassName,
+    //     AverageScore = g.Average(x => x.AverageScore)
+    // })
+    // .ToList();
+
+
+    //             if (!studentScores.Any())
+    //                 return Content(string.Empty);
+
+    //             return Json(studentScores);
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             return Content("Lỗi xử lý controller: " + ex.Message);
+    //         }
+    //     }
     }
 }

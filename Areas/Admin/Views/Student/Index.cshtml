@@ -15,8 +15,9 @@
                     <div class="card recent-sales overflow-auto">
                         <div class="card-header d-flex flex-wrap align-items-center justify-content-end gap-3 p-3">
                             @{
+                                // Lấy classId hiện tại từ query string nếu có, hoặc mặc định là rỗng
                                 var currentClassId = Context.Request.Query["classId"].FirstOrDefault();
-                                var lopHocList = ViewBag.LopHocList as SelectList;
+                                var clList = ViewBag.clList as SelectList;
                             }
                         </div>
 
