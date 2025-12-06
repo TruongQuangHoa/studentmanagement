@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using StudentManagement.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+    // [Area("Admin")]
+    // [Authorize(Roles = "Admin")]
     public class ClassController : Controller
     {
         private readonly DataContext _context;
@@ -72,7 +74,7 @@ namespace StudentManagement.Areas.Admin.Controllers
             for (int i = 0; i < grades.Count; i++)
             {
                 var grade = grades[i];
-                int startYear = cohort.StartYear.Value + i;
+                int startYear = (cohort.StartYear ?? DateTime.Now.Year) + i;
 
                 var newClass = new tblClass
                 {

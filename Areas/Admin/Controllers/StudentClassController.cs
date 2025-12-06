@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using StudentManagement.Models;
 //using OfficeOpenXml;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")] // Bắt buộc: Chỉ Admin mới được vào
     public class StudentClassController : Controller
     {
         private readonly DataContext _context;
@@ -27,7 +29,7 @@ namespace StudentManagement.Areas.Admin.Controllers
             var scList = _context.StudentClasses
                         .Include(h => h.student)
                         .Include(h => h._class)
-                            .ThenInclude(l => l.grade)
+                            .ThenInclude(l => l!.grade)
                         .ToList();
             LoadData();
             return View(scList);
@@ -305,7 +307,7 @@ namespace StudentManagement.Areas.Admin.Controllers
             bool exists = _context.StudentClasses
                 .Include(h => h._class)
                 .Any(h => h.StudentID == model.StudentID &&
-                          h._class.SchoolYear == _class.SchoolYear &&
+                          h._class!.SchoolYear == _class.SchoolYear &&
                           h._class.GradeID == _class.GradeID &&
                           h._class.CohortID == _class.CohortID &&
                           h.StudentClassID != model.StudentClassID &&

@@ -10,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 // using OfficeOpenXml;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")] // Bắt buộc: Chỉ Admin mới được vào
     public class TeacherController : Controller
     {
         private readonly DataContext _context;
@@ -178,12 +180,12 @@ namespace StudentManagement.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult TeacherListPartial(
             string filter,
-            string religionFilter = null,
-            string statusFilter = null,
-            string partyFilter = null,
-            string genderFilter = null,
-            string departmentFilter = null,
-            string ageRangeFilter = null)
+            string? religionFilter = null,
+            string? statusFilter = null,
+            string? partyFilter = null,
+            string? genderFilter = null,
+            string? departmentFilter = null,
+            string? ageRangeFilter = null)
         {
             try
             {
@@ -263,7 +265,7 @@ namespace StudentManagement.Areas.Admin.Controllers
 
                 return Json(teachers);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 return StatusCode(500, "An error occurred while processing your request.");
