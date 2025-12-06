@@ -7,7 +7,7 @@
 
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Danh sách Học sinh - Lớp học</h2>
+        <h2>Danh sách học sinh - lớp học</h2>
     </div>
 
     <section class="section dashboard">
@@ -15,26 +15,92 @@
             <div class="col-12">
                 <div class="card recent-sales overflow-auto">
                     <div class="card-body mt-4">
+                        @* <div
+                            class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4">
+                            <!-- Nút Thêm Học sinh - Lớp học -->
+                            <a class="btn btn-success d-flex align-items-center justify-content-center px-3"
+                                asp-area="Admin" asp-controller="QLHocSinhLopHoc" asp-action="Create"
+                                style="min-width: 220px;">
+                                <i class="bi bi-person-plus-fill me-2"></i>Thêm Học sinh - Lớp học
+                            </a>
+
+                            <!-- Khối Import / Export -->
+                            <div class="d-flex flex-column flex-md-row gap-3">
+
+                                <!-- Form Upload từ Excel -->
+                                <form asp-area="Admin" asp-controller="QLHocSinhLopHoc" asp-action="CreateFromExcel"
+                                    method="post" enctype="multipart/form-data"
+                                    class="d-flex flex-wrap align-items-center gap-2 p-2 border rounded shadow-sm">
+
+                                    <select name="classId" class="form-select" required style="min-width:200px;">
+                                        <option value="">-- Chọn lớp để Import --</option>
+                                        @foreach (var cls in ViewBag.ClassList as SelectList)
+                                        {
+                                            <option value="@cls.Value">@cls.Text</option>
+                                        }
+                                    </select>
+
+                                    <input type="file" name="UploadedFile" accept=".xlsx,.xls" class="form-control"
+                                        required style="min-width:200px;" />
+
+                                    <button type="submit" class="btn btn-warning d-flex align-items-center">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Tải file lên
+                                    </button>
+                                </form>
+
+                                <!-- Form Xuất Excel -->
+                                <form asp-area="Admin" asp-controller="QLHocSinhLopHoc" asp-action="ExportExcel"
+                                    method="get"
+                                    class="d-flex flex-wrap align-items-center gap-2 p-2 border rounded shadow-sm">
+
+                                    <select name="classId" class="form-select" style="min-width:200px;">
+                                        <option value="">-- Tất cả lớp --</option>
+                                        @foreach (var cls in ViewBag.ClassList as SelectList)
+                                        {
+                                            <option value="@cls.Value">@cls.Text</option>
+                                        }
+                                    </select>
+
+                                    <button type="submit" class="btn btn-success d-flex align-items-center">
+                                        <i class="bi bi-file-earmark-excel me-2"></i>Xuất file
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        @if (TempData["Success"] != null)
+                        {
+                            <div class="alert alert-success mt-2">@TempData["Success"]</div>
+                        }
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger mt-2">@TempData["Error"]</div>
+                        } *@
+
                         <table class="table table-borderless datatable">
                             <thead>
                                 <tr>
-                                    <th class="col-1 text-center">#</th>
-                                    <th class="col-3 text-center">Mã Học sinh</th>
-                                    <th class="col-3 text-center">Tên Học sinh</th>
-                                    <th class="col-3 text-center">Lớp</th>
-                                    <th class="col-1 text-center">Đang học</th>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-3 text-center">Mã học sinh</th>
+                                    <th class="col-3 text-center">Tên học sinh</th>
+                                    <th class="col-3 text-center">Lớp học</th>
+                                    <th class="col-1 text-center">Trạng thái học</th>
                                     <th class="col-2 text-center">Chức năng</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @{
+                                    int stt = 0;
+                                }
                                 @foreach (var item in Model)
                                 {
+                                    stt++;
                                     <tr>
-                                        <td class="text-center">@item.StudentClassID</td>
+                                        <td class="text-center">@stt</td>
                                         <td class="text-center">@item.StudentID</td>
                                         <td class="text-center">@item.student?.FullName</td>
                                         <td class="text-center">
-                                            @(item._class != null ? $"{item._class.ClassName} | Khối: {item._class.grade?.GradeName} | Năm học: {item._class.SchoolYear}" : "")
+                                            @(item._class != null ? $"{item._class.ClassName} | Khối:                            {item._class.grade?.GradeName} | Năm học: {item._class.SchoolYear}" : "")
                                         </td>
 
                                         <td class="text-center">
@@ -50,12 +116,12 @@
                                         <td class="text-center">
                                             <a asp-controller="StudentClass" asp-action="Edit"
                                                 asp-route-id="@item.StudentClassID" class="btn btn-primary btn-sm"
-                                                title="Sửa">
+                                                title="Edit the studentclass">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <a asp-controller="StudentClass" asp-action="Delete"
                                                 asp-route-id="@item.StudentClassID" class="btn btn-danger btn-sm"
-                                                title="Xóa">
+                                                title="Delete the studentclass">
                                                 <i class="bi bi-trash"></i>
                                             </a>
                                         </td>

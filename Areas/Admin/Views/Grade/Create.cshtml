@@ -5,14 +5,14 @@
 }
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Thêm khối</h2>
+        <h2>Thêm khối lớp mới</h2>
     </div>
     <div class="container shadow p-5">
         <form method="Post" asp-action="Create">
             <div class="form-row">
                 <div class="form-group col-md-6 mb-3">
-                    <lable>Tên khối</lable>
-                    <input type="text" class="form-control" asp-for="GradeName" placeholder="Tên khối..." required>
+                    <lable>Tên khối lớp</lable>
+                    <input type="text" class="form-control" asp-for="GradeName" placeholder="Tên khối lớp..." required>
                     <span asp-validation-for="GradeName" class="alert-danger"></span>
                 </div>        
 
@@ -25,7 +25,7 @@
                 <div class="form-group col-md-6 mb-3">
                     <label>
                         @Html.CheckBox("IsActive", false)
-                    Hiện thị
+                    Hiển thị
                     </label>
                 </div>
             </div>

@@ -1,0 +1,305 @@
+@model StudentManagement.Models.tblTeacher
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Thêm giáo viên mới</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Create">
+            <div class="form-row row">
+                <div class="form-group col-md-6 mb-3">
+                    <lable>Mã giáo viên</lable>
+                    <input type="text" class="form-control" asp-for="TeacherID" placeholder="Mã giáo viên..." required>
+                    <span asp-validation-for="TeacherID" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Họ và tên</label>
+                    <input type="text" class="form-control" asp-for="FullName" placeholder="Nhập họ và tên..." required>
+                    <span asp-validation-for="FullName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ngày sinh</label>
+                    <input type="date" class="form-control" asp-for="Birth" placeholder="Nhập ngày sinh..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Giới tính</label>
+                    <select asp-for="Gender" class="form-select" id="Gender" required>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Tỉnh/Thành phố</label>
+                    <input id="provinceInput" class="form-control" name="Province" value="@Model?.Province"
+                           placeholder="Nhập hoặc chọn tỉnh/thành phố" autocomplete="off" required />
+                    <select id="provinceSelect" size="5" class="form-select mt-1" style="display:none;"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Xã/Phường</label>
+                    <input id="wardInput" class="form-control" name="Commune" value="@Model?.Commune"
+                           placeholder="Nhập hoặc chọn xã/phường" autocomplete="off" required/>
+                    <select id="wardSelect" size="5" class="form-select mt-1" style="display:none;"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Nhập xóm</label>
+                    <input type="text" class="form-control" id="hamletInput" name="Hamlet" value="@Model?.Hamlet"
+                           placeholder="Nhập xóm..." required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Quốc tịch</label>
+                    <input id="quocTich" class="form-control" name="Nationality"
+                           value="@(Model?.Nationality ?? "Việt Nam")" placeholder="Việt Nam" required/>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Địa chỉ đầy đủ</label>
+                    <input id="address" class="form-control" name="Address" value="@Model?.Address" readonly />
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Trạng thái giáo viên</label>
+                    <select asp-for="StatusTeacher" class="form-select" id="StatusTeacher" required>
+                        <option value="Đang dạy">Đang dạy</option>
+                        <option value="Nghỉ dạy">Nghỉ dạy</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>CCCD</label>
+                    <input type="text" class="form-control" asp-for="CCCD" placeholder="Nhập CCCD..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Dân tộc</label>
+                    <input type="text" class="form-control" asp-for="Nation" placeholder="Nhập dân tộc..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tôn giáo</label>
+                    <select asp-for="Religion" class="form-select" id="Religion" required>
+                        <option value="">--- Chọn ---</option>
+                        <option value="Có">Có</option>
+                        <option value="Không">Không</option>
+                        <option value="Không xác định">Không xác định</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Đảng viên</label>
+                    <select asp-for="GroupDV" class="form-select" id="GroupDV" required>
+                        <option value="">--- Chọn ---</option>
+                        <option value="Đã vào">Đã vào</option>
+                        <option value="Chưa vào">Chưa vào</option>
+                        <option value="Không xác định">Không xác định</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Số điện thoại</label>
+                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mã BHXH</label>
+                    <input type="text" class="form-control" asp-for="NumberBHXH" placeholder="Nhập BHXH..." required>
+                </div>
+
+                <div class="form-group col-md-4 mb-3">
+                    <label>Bộ môn</label>
+                    <select asp-for="DepartmentID" class="form-control" asp-items="ViewBag.dpList" required>
+                        <option value="">--- Tên bộ môn ---</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Môn học giáo viên dạy</label>
+                    <div>
+                        @foreach (var subject in (SelectList)ViewBag.sbList)
+                        {
+                            var selectedSubjects = ViewBag.SelectedSubjects as List<int> ?? new List<int>();
+                            var isChecked = selectedSubjects.Contains(int.Parse(subject.Value));
+
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" class="form-check-input" name="SelectedSubjectIDs"
+                                       value="@subject.Value" @(isChecked ? "checked" : "") />
+                                <label class="form-check-label">@subject.Text</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", false)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+
+            <a asp-controller="Teacher" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const hamletInput = document.getElementById('hamletInput');
+        const provinceInput = document.getElementById('provinceInput');
+        const provinceSelect = document.getElementById('provinceSelect');
+        // districtInput and districtSelect are removed
+        const wardInput = document.getElementById('wardInput');
+        const wardSelect = document.getElementById('wardSelect');
+        const quocTichInput = document.getElementById('quocTich');
+        const addressInput = document.getElementById('address');
+
+        let provinces = [];
+        let wards = []; // Districts array is removed
+
+        // Load provinces
+        fetch('https://provinces.open-api.vn/api/p/')
+            .then(res => res.json())
+            .then(data => {
+                provinces = data;
+                renderSelectOptions(provinceSelect, provinces);
+            });
+
+        function renderSelectOptions(selectElem, items) {
+            selectElem.innerHTML = '';
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.code;
+                option.textContent = item.name;
+                selectElem.appendChild(option);
+            });
+        }
+
+        function filterItems(list, text) {
+            return list.filter(item => item.name.toLowerCase().includes(text.toLowerCase()));
+        }
+
+        function toggleDropdown(selectElem, show) {
+            selectElem.style.display = show ? 'block' : 'none';
+        }
+
+        // ----- PROVINCE -----
+        provinceInput.addEventListener('focus', () => {
+            renderSelectOptions(provinceSelect, provinces);
+            toggleDropdown(provinceSelect, true);
+        });
+
+        provinceInput.addEventListener('input', () => {
+            const filtered = filterItems(provinces, provinceInput.value);
+            renderSelectOptions(provinceSelect, filtered);
+            toggleDropdown(provinceSelect, filtered.length > 0);
+        });
+
+        provinceInput.addEventListener('blur', () => {
+            setTimeout(() => toggleDropdown(provinceSelect, false), 200);
+        });
+
+        provinceSelect.addEventListener('click', (e) => {
+            const selected = provinceSelect.options[provinceSelect.selectedIndex];
+            if (!selected) return;
+            provinceInput.value = selected.textContent;
+            toggleDropdown(provinceSelect, false);
+            loadWards(selected.value); // Directly call loadWards for the selected province
+            wardInput.value = ''; // Clear ward input when province changes
+            updateFullAddress();
+        });
+
+        // Function to load wards based on province code
+        function loadWards(provinceCode) {
+            fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`)
+                .then(res => res.json())
+                .then(data => {
+                    // Collect all wards from all districts within the province
+                    wards = data.districts.flatMap(district => district.wards) || [];
+                    renderSelectOptions(wardSelect, wards);
+                    wardInput.disabled = false;
+                })
+                .catch(error => {
+                    console.error("Error loading wards:", error);
+                    wards = []; // Reset wards if fetching fails
+                    renderSelectOptions(wardSelect, []);
+                    wardInput.disabled = true;
+                });
+        }
+
+        // ----- WARD -----
+        wardInput.addEventListener('focus', () => {
+            // Ensure wards are loaded if province was pre-selected but wards weren't fetched
+            if (provinceInput.value && wards.length === 0) {
+                const currentProvince = provinces.find(p => p.name === provinceInput.value);
+                if (currentProvince) {
+                    loadWards(currentProvince.code);
+                }
+            } else {
+                renderSelectOptions(wardSelect, wards); // Render existing wards
+            }
+            toggleDropdown(wardSelect, true);
+        });
+
+        wardInput.addEventListener('input', () => {
+            const filtered = filterItems(wards, wardInput.value);
+            renderSelectOptions(wardSelect, filtered);
+            toggleDropdown(wardSelect, filtered.length > 0);
+        });
+
+        wardInput.addEventListener('blur', () => {
+            setTimeout(() => toggleDropdown(wardSelect, false), 200);
+        });
+
+        wardSelect.addEventListener('click', (e) => {
+            const selected = wardSelect.options[wardSelect.selectedIndex];
+            if (!selected) return;
+            wardInput.value = selected.textContent;
+            toggleDropdown(wardSelect, false);
+            updateFullAddress();
+        });
+
+        // ----- UPDATE FULL ADDRESS -----
+        // Removed districtInput from the event listeners
+        [hamletInput, wardInput, provinceInput, quocTichInput].forEach(input => {
+            input.addEventListener('input', updateFullAddress);
+            input.addEventListener('change', updateFullAddress);
+        });
+
+        function updateFullAddress() {
+            const hamlet = hamletInput.value.trim();
+            const ward = wardInput.value.trim();
+            const province = provinceInput.value.trim();
+            const nation = quocTichInput.value.trim() || "Việt Nam";
+
+            const addressParts = [];
+            if (hamlet) addressParts.push(hamlet);
+            if (ward) addressParts.push(ward);
+            // District is no longer included
+            if (province) addressParts.push(province);
+            addressParts.push(nation);
+
+            addressInput.value = addressParts.join(', ');
+        }
+
+        // Initialize values on page load if they exist
+        if (provinceInput.value || wardInput.value || hamletInput.value) {
+            updateFullAddress();
+        }
+    });
+</script>

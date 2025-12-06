@@ -8,7 +8,6 @@
         <h2>Danh sách chức năng</h2>
 
         <p>
-
         <section class="section dashboard">
             <div class="row">
                 <div class="col-12">
@@ -18,10 +17,9 @@
                                 <thead>
                                     <tr>
                                         <th class="col-1 text-center">STT</th>
-                                        <th class="col-1 text-center">Mã khối</th>
-                                        <th class="col-1 text-center">Tên khối</th>
+                                        <th class="col-1 text-center">Tên khối lớp</th>
                                         <th class="col-1 text-center">Mô tả</th>
-                                        <th class="col-1 text-center">Hiện thị</th>
+                                        <th class="col-1 text-center">Hiển thị</th>
                                         <th class="col-1 text-center">Chức năng</th>
                                     </tr>
                                 </thead>
@@ -34,7 +32,6 @@
                                         stt++; // 2. Tăng biến đếm cho mỗi mục
                                         <tr>
                                             <td class="text-center" scope="row">@stt</td>
-                                            <td class="text-center" scope="row">@item.GradeID</td>
                                             <td class="text-left text-primary text-center" scope="row">
                                                 <a asp-area="Admin" asp-controller="QLKhoi" asp-action="Details"
                                                     asp-route-id="@item.GradeID">
@@ -57,13 +54,12 @@
                                             <td class="text-center" scope="row">
                                                 <a asp-area="Admin" asp-controller="Grade" asp-action="Edit"
                                                     asp-route-id="@item.GradeID" class="btn btn-primary btn-sm"
-                                                    title="Edit the Grade"><i class="bi bi-pencil"></i></a>
+                                                    title="Edit the grade"><i class="bi bi-pencil"></i></a>
                                                 <a asp-area="Admin" asp-controller="Grade" asp-action="Delete"
                                                     asp-route-id="@item.GradeID" class="btn btn-danger btn-sm"
-                                                    title="Delete the Grade"><i class="bi bi-trash"></i></a>
+                                                    title="Delete the grade"><i class="bi bi-trash"></i></a>
 
                                             </td>
-
                                         </tr>
                                     }
                                 </tbody>

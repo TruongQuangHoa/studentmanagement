@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Models;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Controllers
 {
+    [Authorize(Roles = "Admin,Teacher")]
     public class StudentController : Controller
     {
         private readonly DataContext _context;
@@ -31,7 +33,6 @@ namespace StudentManagement.Controllers
 
             // Trả về view Profile.cshtml trong Views/Student/
             return View("Profile", student);
-;
         }
     }
 }

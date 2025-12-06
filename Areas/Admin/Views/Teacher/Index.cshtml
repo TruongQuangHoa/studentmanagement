@@ -1,0 +1,141 @@
+@using StudentManagement.Models;
+@model IList<tblTeacher>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Quản lý Giáo Viên";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách chức năng</h2>
+
+        <p>
+        <section class="section dashboard">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto">
+                        @* <div class="card-header d-flex justify-content-end align-items-center gap-2 mb-3">
+
+                             <!-- Nút Thống Kê -->
+                            <a type="button" class="btn btn-info" asp-area="Admin" asp-controller="QLGiaoVien" asp-action="Thongke">
+                                <i class="bi bi-bar-chart-line me-1"></i>Thống Kê
+                            </a>
+
+                            <!-- Nút Tải lên -->
+                          <div class="col-auto">
+                                @using (Html.BeginForm("FileUpload", "QLGiaoVien", FormMethod.Post, new { enctype = "multipart/form-data", @class = "d-flex align-items-center", style = "margin: 0;" }))
+                                {
+                                    <input type="file" name="UploadedFile" accept=".xls,.xlsx" class="form-control d-none" id="file-input" required />
+                                    <button type="button" id="btn-Upload" class="btn btn-primary">
+                                        <i class="bi bi-upload me-1"></i> Tải lên
+                                    </button>
+                                }
+                            </div>
+
+                            <!-- Nút Tải về Excel -->
+                            <form method="post" action="@Url.Action("Export", "QLGiaoVien")" class="m-0 d-flex align-items-center">
+                                <button type="submit" class="btn btn-info">
+                                    <i class="bi bi-download me-1"></i> Tải về Excel
+                                </button>
+                            </form>
+                        </div> *@
+                        <div class="card-body mt-4">
+                            <table class="table table-borderless datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="col-1 text-center">STT</th>
+                                        <th class="col-1 text-center">Mã giáo viên</th>
+                                        <th class="col-1 text-center">Họ và tên</th>
+                                        <th class="col-1 text-center">Ngày sinh</th>
+                                        <th class="col-1 text-center">Giới tính</th>
+                                        <th class="col-3 text-center">Địa chỉ</th>
+                                        <th class="col-1 text-center">Tình trạng giáo viên</th>
+                                        <th class="col-1 text-center">Số điện thoại</th>
+                                        <th class="col-1 text-center">Bộ môn</th>
+                                        <th class="col-1 text-center">Hiển thị</th>
+                                        <th class="col-1 text-center">Chức năng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int stt = 0;
+                                    }
+                                    @foreach (var item in Model)
+                                    {
+                                        stt++;
+                                        <tr>
+                                            <td class="text-center" scope="row">@stt</td>
+                                            <td class="text-center" scope="row">@item.TeacherID</td>
+                                            <td class="text-left text-primary text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="Teacher" asp-action="Details"
+                                                    asp-route-id="@item.ID">
+                                                    @item.FullName
+                                                </a>
+                                            </td>
+                                            <td class="text-center" scope="row">@item.Birth?.ToString("dd/MM/yyyy") </td>
+                                            <td class="text-center" scope="row">@item.Gender</td>
+                                            <td class="text-center" scope="row">@item.Address</td>
+                                            <td class="text-center" scope="row">@item.StatusTeacher</td>
+                                            <td class="text-center" scope="row">@item.NumberPhone</td>
+                                            <td class="text-center" scope="row">@item.department?.DepartmentName</td>
+                                            <td class="text-center">
+                                                <form asp-area="Admin" asp-controller="Teacher" asp-action="ToggleStatus"
+                                                    method="post">
+                                                    <input type="hidden" name="id" value="@item.ID" />
+                                                    <div class="form-check form-switch d-flex justify-content-center">
+                                                        <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                            name="IsActive" @(item.IsActive ? "checked" : "")
+                                                            onchange="this.form.submit()" />
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td class="text-center" scope="row">
+                                                <a asp-area="Admin" asp-controller="Teacher" asp-action="Edit"
+                                                    asp-route-id="@item.ID" class="btn btn-primary btn-sm"
+                                                    title="Edit the teacher"><i class="bi bi-pencil"></i></a>
+                                                <a asp-area="Admin" asp-controller="Teacher" asp-action="Delete"
+                                                    asp-route-id="@item.ID" class="btn btn-danger btn-sm"
+                                                    title="Delete the teacher"><i class="bi bi-trash"></i></a>
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </p>
+    </div>
+</main>
+
+
+<script>
+    document.getElementById('btn-Upload').addEventListener('click', function () {
+        const fileInput = document.getElementById('file-input');
+        fileInput.click();
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files.length > 0) {
+                fileInput.closest('form').submit();
+            }
+        });
+    });
+
+    // JavaScript để xử lý lọc khi chọn lớp
+    document.getElementById('classFilterDropdown').addEventListener('change', function () {
+        document.getElementById('filterForm').submit();
+    });
+
+    // JavaScript để xử lý nút "Tải Excel lớp đã chọn"
+    document.getElementById('exportByClassForm').addEventListener('submit', function (event) {
+        var selectedClassId = document.getElementById('classFilterDropdown').value;
+        if (selectedClassId === "" || selectedClassId === "0") { // Kiểm tra nếu không có lớp nào được chọn
+            alert("Vui lòng chọn một lớp cụ thể để tải Excel theo lớp.");
+            event.preventDefault(); // Ngăn chặn form gửi đi
+        } else {
+            document.getElementById('selectedClassIdForExport').value = selectedClassId;
+        }
+    });
+
+</script>

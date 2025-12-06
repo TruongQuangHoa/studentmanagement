@@ -17,11 +17,10 @@
                                 <thead>
                                     <tr>
                                         <th class="col-1 text-center">STT</th>
-                                        <th class="col-1 text-center">Mã khóa</th>
                                         <th class="col-2 text-center">Năm vào</th>
                                         <th class="col-2 text-center">Năm ra</th>
                                         <th class="col-1 text-center">Niên khóa</th>
-                                        <th class="col-1 text-center">Hiện thị</th>
+                                        <th class="col-1 text-center">Hiển thị</th>
                                         <th class="col-1 text-center">Chức năng</th>
                                     </tr>
                                 </thead>
@@ -34,15 +33,9 @@
                                         stt++; // 2. Tăng biến đếm cho mỗi mục
                                         <tr>
                                             <td class="text-center" scope="row">@stt</td>
-                                            <td class="text-left text-primary text-center" scope="row">
-                                                <a asp-area="Admin" asp-controller="QLKhoaHoc" asp-action="Details"
-                                                    asp-route-id="@item.CohortID">
-                                                    @item.CohortID
-                                                </a>
-                                            </td>
                                             <td class="text-center" scope="row">@item.StartYear</td>
                                             <td class="text-center" scope="row">@item.EndYear</td>
-                                            <td class="text-center" scope="row">@item.CohortName</td>
+                                            <td class="text-center text-primary" scope="row">@item.CohortName</td>
 
                                             <td class="text-center">
                                                 <form asp-area="Admin" asp-controller="Cohort" asp-action="ToggleStatus"
@@ -58,11 +51,10 @@
                                             <td class="text-center" scope="row">
                                                 <a asp-area="Admin" asp-controller="Cohort" asp-action="Edit"
                                                     asp-route-id="@item.CohortID" class="btn btn-primary btn-sm"
-                                                    title="Edit the Cohort"><i class="bi bi-pencil"></i></a>
+                                                    title="Edit the cohort"><i class="bi bi-pencil"></i></a>
                                                 <a asp-area="Admin" asp-controller="Cohort" asp-action="Delete"
                                                     asp-route-id="@item.CohortID" class="btn btn-danger btn-sm"
-                                                    title="Delete the Cohort"><i class="bi bi-trash"></i></a>
-
+                                                    title="Delete the cohort"><i class="bi bi-trash"></i></a>
                                             </td>
                                         </tr>
                                     }

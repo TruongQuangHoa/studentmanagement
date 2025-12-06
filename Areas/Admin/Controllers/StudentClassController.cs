@@ -6,12 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Models;
+//using OfficeOpenXml;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace StudentManagement.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")] // Bắt buộc: Chỉ Admin mới được vào
     public class StudentClassController : Controller
     {
         private readonly DataContext _context;
@@ -26,17 +29,19 @@ namespace StudentManagement.Areas.Admin.Controllers
             var scList = _context.StudentClasses
                         .Include(h => h.student)
                         .Include(h => h._class)
-                            .ThenInclude(l => l.grade)
+                            .ThenInclude(l => l!.grade)
                         .ToList();
             LoadData();
             return View(scList);
         }
 
+        // Cập nhật số học sinh hiện tại
         private void UpdateCurrentStudents(int classId)
         {
             var _class = _context.Classes.Find(classId);
             if (_class != null)
             {
+                // Đếm số học sinh duy nhất trong lớp (Distinct theo StudentID)
                 int uniqueStudentCount = _context.StudentClasses
                     .Where(h => h.ClassID == classId && h.IsActive)
                     .Select(h => h.StudentID)
@@ -51,6 +56,7 @@ namespace StudentManagement.Areas.Admin.Controllers
 
         private void LoadData(int? selectedClassID = null, int? selectedSemesterID = null, int? selectedCourseID = null)
         {
+            // Danh sách học sinh
             var students = _context.Students
                 .Select(s => new { Value = s.StudentID, Text = s.FullName })
                 .ToList();
@@ -63,6 +69,7 @@ namespace StudentManagement.Areas.Admin.Controllers
                         }).ToList();
             ViewBag.StudentList = new SelectList(stList, "StudentID", "Info");
 
+            // Danh sách lớp
             var clList = _context.Classes
                 .Include(l => l.grade)
                 .Include(l => l.cohort)
@@ -80,6 +87,15 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             ViewBag.ClassList = new SelectList(clList, "ClassID", "Info", selectedClassID);
 
+            // Danh sách năm học - học kỳ
+            var ysList = _context.YearSemesters
+                .Where(s => s.IsActive)
+                .Select(s => new { s.YearSemesterID, Text = s.SemesterName + " - " + s.SchoolYear })
+                .ToList();
+
+            ViewBag.ysList = new SelectList(ysList, "SemesterID", "Text", selectedSemesterID);
+
+            // Danh sách khóa học
             var chList = _context.Cohorts
                 .Where(c => c.IsActive)
                 .Select(c => new { c.CohortID, Text = c.CohortName })
@@ -100,6 +116,8 @@ namespace StudentManagement.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewData["ClassID"] = new SelectList(_context.Classes, "ClassID", "ClassName", model.ClassID);
+                ViewData["StudentID"] = new SelectList(_context.Students, "StudentID", "FullName", model.StudentID);
                 LoadData(model.ClassID);
                 return View(model);
             }
@@ -114,28 +132,140 @@ namespace StudentManagement.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // 🔎 Kiểm tra học sinh đã có trong lớp chưa
-            bool exists = _context.StudentClasses
-                .Any(s => s.StudentID == model.StudentID && s.ClassID == model.ClassID && s.IsActive);
+            // Lấy tất cả năm học - học kỳ thuộc niên khóa của lớp
+            var yearsemesters = _context.YearSemesters
+                .Where(s => s.SemesterName == _class.SchoolYear && s.IsActive)
+                .ToList();
 
-            if (exists)
+            if (!yearsemesters.Any())
             {
-                TempData["Error"] = "Học sinh này đã có trong lớp.";
-                LoadData(model.ClassID);
-                return View(model);
+                TempData["Error"] = $"Chưa khai báo năm học - học kỳ cho niên khóa {_class.SchoolYear}.";
+                return RedirectToAction(nameof(Index));
             }
 
-            // ✅ Thêm mới bản ghi
-            model.IsActive = true;
-            _context.StudentClasses.Add(model);
-            await _context.SaveChangesAsync();
+            int addedCount = 0;
 
-            // ✅ Cập nhật lại số lượng học sinh hiện tại của lớp
+            foreach (var yearsemester in yearsemesters)
+            {
+                // Kiểm tra trùng
+                bool exists = _context.StudentClasses
+                    .Any(h => h.StudentID == model.StudentID &&
+                              h.ClassID == model.ClassID &&
+                              h.YearSemesterID == yearsemester.YearSemesterID &&
+                              h.CohortID == _class.CohortID &&
+                              h.IsActive);
+
+                if (exists) continue;
+
+                var newEntry = new tblStudentClass
+                {
+                    StudentID = model.StudentID,
+                    ClassID = model.ClassID,
+                    YearSemesterID = yearsemester.YearSemesterID,
+                    CohortID = _class.CohortID,
+                    IsActive = true
+                };
+
+                _context.StudentClasses.Add(newEntry);
+                addedCount++;
+            }
+
+            await _context.SaveChangesAsync();
             UpdateCurrentStudents(model.ClassID);
 
-            TempData["Success"] = "Đã thêm học sinh vào lớp thành công!";
+            TempData["Success"] = $"Đã thêm {addedCount} bản ghi học sinh vào lớp {_class.ClassName} (theo đầy đủ học kỳ/niên khóa).";
             return RedirectToAction(nameof(Index));
         }
+
+        // public IActionResult CreateFromExcel()
+        // {
+        //     LoadDuLieu(); // Nạp ViewBag.ClassList
+        //     return View();
+        // }
+
+        // [HttpPost]
+        // public async Task<IActionResult> CreateFromExcel(IFormFile UploadedFile, int classId)
+        // {
+        //     if (UploadedFile == null || UploadedFile.Length == 0)
+        //     {
+        //         TempData["Error"] = "Chưa chọn file Excel.";
+        //         return RedirectToAction("Index");
+        //     }
+
+        //     var lopHoc = _context.QLLopHocs
+        //         .Include(l => l.Khois)
+        //         .Include(l => l.KhoaHoc)
+        //         .FirstOrDefault(l => l.ClassID == classId && l.IsActive);
+
+        //     if (lopHoc == null)
+        //     {
+        //         TempData["Error"] = "Lớp học không tồn tại hoặc không còn hoạt động.";
+        //         return RedirectToAction("Index");
+        //     }
+
+        //     // Lấy danh sách học kỳ thuộc niên khóa của lớp
+        //     var semesters = _context.QLHocKys
+        //         .Where(s => s.semester_code == lopHoc.SchoolYear && s.IsActive)
+        //         .ToList();
+
+        //     if (!semesters.Any())
+        //     {
+        //         TempData["Error"] = $"Chưa khai báo học kỳ cho niên khóa {lopHoc.SchoolYear}.";
+        //         return RedirectToAction("Index");
+        //     }
+
+        //     int addedCount = 0;
+        //     using var stream = new MemoryStream();
+        //     await UploadedFile.CopyToAsync(stream);
+
+        //     using var package = new ExcelPackage(stream);
+        //     var worksheet = package.Workbook.Worksheets[0];
+        //     int rowCount = worksheet.Dimension.Rows;
+
+        //     for (int row = 2; row <= rowCount; row++) // bỏ dòng header
+        //     {
+        //         string studentId = worksheet.Cells[row, 2].Text?.Trim();
+        //         if (string.IsNullOrEmpty(studentId)) continue;
+
+        //         studentId = new string(studentId.Where(c => !char.IsControl(c)).ToArray());
+
+        //         var hs = _context.QLHocSinhs.FirstOrDefault(s => s.StudentID == studentId);
+        //         if (hs == null) continue;
+
+        //         // Kiểm tra lớp đầy
+        //         int currentCount = _context.QLHocSinhLopHocs.Count(h => h.ClassID == classId && h.IsActive);
+        //         if (currentCount >= lopHoc.MaxStudents) break;
+
+        //         foreach (var semester in semesters)
+        //         {
+        //             bool exists = _context.QLHocSinhLopHocs
+        //                 .Any(h => h.StudentID == studentId &&
+        //                           h.ClassID == classId &&
+        //                           h.SemesterID == semester.SemesterID &&
+        //                           h.CourseID == lopHoc.CourseID &&
+        //                           h.IsActive);
+
+        //             if (exists) continue;
+
+        //             _context.QLHocSinhLopHocs.Add(new QLHocSinhLopHoc
+        //             {
+        //                 StudentID = studentId,
+        //                 ClassID = classId,
+        //                 SemesterID = semester.SemesterID,
+        //                 CourseID = lopHoc.CourseID,
+        //                 IsActive = true
+        //             });
+
+        //             addedCount++;
+        //         }
+        //     }
+
+        //     await _context.SaveChangesAsync();
+        //     UpdateCurrentStudents(classId);
+
+        //     TempData["Success"] = $"Đã thêm {addedCount} bản ghi học sinh (theo đầy đủ học kỳ/niên khóa) vào lớp {lopHoc.ClassName}.";
+        //     return RedirectToAction("Index");
+        // }
 
         public IActionResult Edit(int id)
         {
@@ -146,27 +276,15 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             if (entity == null) return NotFound();
 
-            // Truyền các ID hiện tại để preselect dropdown
-            LoadData(entity.ClassID, null, entity._class?.CohortID);
+            LoadData();
             return View(entity);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Edit(tblStudentClass model)
         {
             if (!ModelState.IsValid)
             {
-                LoadData(model.ClassID);
-                return View(model);
-            }
-
-            var existing = _context.StudentClasses
-                .FirstOrDefault(h => h.StudentClassID == model.StudentClassID);
-
-            if (existing == null)
-            {
-                ModelState.AddModelError("", "Không tìm thấy dữ liệu để cập nhật.");
                 LoadData(model.ClassID);
                 return View(model);
             }
@@ -183,11 +301,13 @@ namespace StudentManagement.Areas.Admin.Controllers
                 return View(model);
             }
 
-            // Kiểm tra trùng lặp
+            var oldEntity = _context.StudentClasses.AsNoTracking()
+                              .FirstOrDefault(h => h.StudentClassID == model.StudentClassID);
+
             bool exists = _context.StudentClasses
                 .Include(h => h._class)
                 .Any(h => h.StudentID == model.StudentID &&
-                          h._class.SchoolYear == _class.SchoolYear &&
+                          h._class!.SchoolYear == _class.SchoolYear &&
                           h._class.GradeID == _class.GradeID &&
                           h._class.CohortID == _class.CohortID &&
                           h.StudentClassID != model.StudentClassID &&
@@ -200,31 +320,18 @@ namespace StudentManagement.Areas.Admin.Controllers
                 return View(model);
             }
 
-            try
+            _context.StudentClasses.Update(model);
+            _context.SaveChanges();
+
+            if (oldEntity != null)
             {
-                // ✅ Chỉ cập nhật các thuộc tính cho phép
-                existing.StudentID = model.StudentID;
-                existing.ClassID = model.ClassID;
-                existing.IsActive = model.IsActive;
-
-                _context.SaveChanges();
-
-                // ✅ Cập nhật lại số lượng học sinh
-                UpdateCurrentStudents(existing.ClassID);
-                if (existing.ClassID != model.ClassID)
+                UpdateCurrentStudents(oldEntity.ClassID);
+                if (oldEntity.ClassID != model.ClassID)
                     UpdateCurrentStudents(model.ClassID);
-
-                TempData["Success"] = "Cập nhật thông tin thành công!";
-                return RedirectToAction("Index");
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Có lỗi xảy ra khi cập nhật: " + ex.Message);
-                LoadData(model.ClassID);
-                return View(model);
-            }
+            LoadData();
+            return RedirectToAction("Index");
         }
-
 
         public IActionResult Delete(int id)
         {
@@ -264,5 +371,57 @@ namespace StudentManagement.Areas.Admin.Controllers
 
             return RedirectToAction("Index");
         }
+
+        // public IActionResult ExportExcel(int? classId)
+        // {
+        //     // Lấy danh sách học sinh – lớp
+        //     var list = _context.QLHocSinhLopHocs
+        //                 .Include(h => h.hocsinh)
+        //                 .Include(h => h.lopHoc)
+        //                 .AsQueryable();
+
+        //     if (classId.HasValue && classId.Value > 0)
+        //         list = list.Where(h => h.ClassID == classId.Value);
+
+        //     // Chỉ lấy duy nhất mỗi học sinh trong một lớp
+        //     var data = list
+        //         .GroupBy(h => new { h.StudentID, h.ClassID })
+        //         .Select(g => g.First())
+        //         .OrderBy(h => h.lopHoc.ClassName)
+        //         .ThenBy(h => h.hocsinh.FullName)
+        //         .ToList();
+
+        //     using (var package = new ExcelPackage())
+        //     {
+        //         var ws = package.Workbook.Worksheets.Add("HocSinhLopHoc");
+
+        //         // Header
+        //         ws.Cells[1, 1].Value = "STT";
+        //         ws.Cells[1, 2].Value = "StudentID";
+        //         ws.Cells[1, 3].Value = "Họ tên";
+        //         ws.Cells[1, 4].Value = "Tên lớp";
+        //         ws.Cells[1, 5].Value = "Niên khóa";
+
+        //         int row = 2;
+        //         foreach (var item in data)
+        //         {
+        //             ws.Cells[row, 1].Value = row - 1;
+        //             ws.Cells[row, 2].Value = item.StudentID;
+        //             ws.Cells[row, 3].Value = item.hocsinh?.FullName ?? "";
+        //             ws.Cells[row, 4].Value = item.lopHoc?.ClassName ?? "";
+        //             ws.Cells[row, 5].Value = item.lopHoc?.SchoolYear ?? "";
+        //             row++;
+        //         }
+
+        //         ws.Cells[ws.Dimension.Address].AutoFitColumns();
+
+        //         var stream = new MemoryStream();
+        //         package.SaveAs(stream);
+        //         stream.Position = 0;
+
+        //         string excelName = $"HocSinhLopHoc-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+        //         return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+        //     }
+        // }
     }
 }
