@@ -9,11 +9,22 @@
     <div class="form-row">
         <div class="form-group col-md-6">
             <label asp-for="ClassID">Mã lớp</label>
-            <input type="text" class="form-control mb-3" asp-for="ClassID" disaled />
+            <input type="text" class="form-control mb-3" asp-for="ClassID" disabled />
         </div>
+
+        <div class="form-group col-md-6 mb-3">
+            <label>Khối lớp</label>
+            <input type="text" class="form-control" value="@Model.grade?.GradeName" disabled />
+        </div>
+
         <div class="form-group col-md-6">
             <label asp-for="ClassName">Tên lớp</label>
-            <input type="text" class="form-control mb-3" asp-for="ClassName" disaled />
+            <input type="text" class="form-control mb-3" asp-for="ClassName" disabled />
+        </div>
+
+        <div class="form-group col-md-6">
+            <label asp-for="SchoolYear">Năm học</label>
+            <input type="text" class="form-control mb-3" asp-for="SchoolYear" disabled />
         </div>
     </div>
     <!-- Begin Form -->

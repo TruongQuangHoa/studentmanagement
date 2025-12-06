@@ -1,151 +1,28 @@
-﻿@model StudentManagement.Models.HomeDashboardVM
-
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Trang Chủ Học Sinh";
-}
-
-<script>
-    function formatDate(date) {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        return date.toLocaleDateString('vi-VN', options);
-    }
-    document.addEventListener("DOMContentLoaded", function() {
-        const dateElement = document.getElementById('current-date');
-        if (dateElement) {
-            dateElement.textContent = formatDate(new Date());
-        }
-    });
-</script>
-
-<main id="main" class="main">
-    <div class="pagetitle">
-        <h1>TRƯỜNG THPT</h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">Trang Chủ</a></li>
-                <li class="breadcrumb-item active">Dashboard</li>
-            </ol>
-            <p id="current-date" class="text-muted small mt-1">Đang tải ngày tháng...</p>
-        </nav>
-    </div>
-    
+﻿<main id="main" class="main">
     <section class="section dashboard">
         <div class="row">
-           
-            @* ======= CỘT CHÍNH (8/12) - TIN TỨC ======= *@
+
+            <!-- Left side columns -->
             <div class="col-lg-8">
                 <div class="row">
-                    @* Khối 1: Slideshow Tin Tức Nổi Bật *@
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Tin Tức Nổi Bật <span>| Từ Ban Truyền Thông</span></h5>
-                                <div id="postCarousel" class="carousel slide" data-bs-ride="carousel">
-                                    <div class="carousel-inner">
-                                      
-                                        @{
-                                            int slideIndex = 0;
-                                            // Lấy tin từ CSDL
-                                            var postsForSlideshow = Model.FeaturedPosts?.Take(3).ToList() ?? new List<tblPost>();
-                                            bool hasSlides = postsForSlideshow.Any();
-                                        }
-
-                                        @if (hasSlides)
-                                        {
-                                            @foreach (var post in postsForSlideshow)
-                                            {
-                                                string activeClass = (slideIndex == 0) ? "active" : "";
-                                                string imageUrlPath = post.ImageUrl != null ? post.ImageUrl.Replace("~", "") : "";
-
-                                                <div class="carousel-item @activeClass">
-                                                    <img src="@imageUrlPath" class="d-block w-100 rounded" alt="@post.Title" style="height: 350px; object-fit: cover;">
-                                                    
-                                            
-                                                    <div class="carousel-caption d-none d-md-block pb-4">
-                                                        
-                                                        
-                                                        <a asp-controller="Post" asp-action="Details" asp-route-id="@post.PostID" class="btn btn-primary">Xem chi tiết</a>
-                                                    
-                                                    </div>
-                                                   
-
-                                                </div>
-                                                slideIndex++;
-                                            }
-                                        }
-                                        else
-                                        {
-                                           
-                                            <div class="carousel-item active">
-                                                <img src="https://placehold.co/800x400/AAAAAA/FFFFFF?text=Welcome+to+Student+Management" class="d-block w-100 rounded" alt="Chào mừng" style="height: 350px; object-fit: cover;">
-                                                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-2">
-                                                    <h5 class="text-white">Chào mừng @Model.FullName đến với hệ thống</h5>
-                                                    <p>Hiện chưa có thông báo nổi bật.</p>
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-                                   
-                                    @if (postsForSlideshow.Count > 1)
-                                    {
-                                        <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span></button>
-                                        <button class="carousel-control-next" type="button" data-bs-target="#postCarousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span></button>
-                                    }
-                                   
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @* Khối 2: Tin Tức Khác (Lấy từ CSDL) *@
-                    <div class="col-12">
-                        <div class="card recent-sales overflow-auto">
-                            <div class="card-body">
-                                <h5 class="card-title">Tin Tức Khác <span>| Mới nhất</span></h5>
-                               
-                                <div class="news">
-                                    @{
-                                        // Lấy các tin tiếp theo sau slide
-                                        var otherNews = Model.FeaturedPosts?.Skip(1).Take(5).ToList() ?? new List<tblPost>();
-                                    }
-
-                                    @if (otherNews.Any())
-                                    {
-                                        @foreach (var post in otherNews)
-                                        {
-                                            string otherNewsImg = post.ImageUrl != null ? post.ImageUrl.Replace("~", "") : "";
-
-                                            <div class="post-item clearfix">
-                                                <img src="@otherNewsImg" alt="@post.Title" style="width: 80px; height: 60px; object-fit: cover;">
-                                                <h4><a asp-controller="Post" asp-action="Details" asp-route-id="@post.PostID">@post.Title</a></h4>
-                                                <p>@post.Summary</p>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <div class="p-3 text-center text-muted">Không có tin tức nào khác để hiển thị.</div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Reports -->
+                    @await Component.InvokeAsync("Post")
                 </div>
             </div>
+            <!-- End Left side columns -->
 
             @* ======= CỘT THANH BÊN (4/12) ======= *@
             <div class="col-lg-4">
                 @* Khối 1: Hoạt động *@
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Người Dùng Đang Hoạt Động</h5>
+                        <h5 class="card-title">Người dùng đang hoạt động</h5>
                         <div class="activity">
                             <div class="activity-item d-flex">
                                 <div class="activite-label">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
                                 <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
                                 <div class="activity-content">
-                                    <span>24290002 - Đã online 1 phút</span>
+                                    <span> - Đã online 1 phút</span>
                                 </div>
                             </div>
                         </div>
@@ -155,49 +32,53 @@
                 @* Khối 2: Thông Báo Khác (TĨNH) - ĐÃ SỬA ĐƯỜNG DẪN *@
                 <div class="card">
                     <div class="card-body pb-0">
-                        <h5 class="card-title">Thông Báo Khác <span>| Thông báo</span></h5>
-          <div class="news">
-              
-              <div class="post-item clearfix">
-                  <img src="/assets/img/1.jpg" alt="Thumbnail" style="width: 80px; height: 60px; object-fit: cover;">
-                  
-                  <h4><a href="/assets/img/slide-1.jpg" target="_blank">Cập nhật TKB tuần tới</a></h4>
-                  <p>Lưu ý về sự thay đổi phòng học...</p>
-              </div>
+                        <h5 class="card-title"><span>Bài đăng khác</span></h5>
+                        <div class="news">
 
-              <div class="post-item clearfix">
-                  <img src="/assets/img/2.jpg" alt="Thumbnail" style="width: 80px; height: 60px; object-fit: cover;">
-                  <h4><a href="/assets/img/slide-2.jpg" target="_blank">Đăng ký câu lạc bộ</a></h4>
-                  <p>Thời hạn đăng ký các CLB mới đã mở...</p>
-              </div>
+                            <div class="post-item clearfix">
+                                <img src="/assets/img/1.jpg" alt="Thumbnail"
+                                    style="width: 80px; height: 60px; object-fit: cover;">
 
-          </div>
+                                <h4><a href="/assets/img/slide-1.jpg" target="_blank">Cập nhật TKB tuần tới</a></h4>
+                                <p>Lưu ý về sự thay đổi phòng học...</p>
+                            </div>
+
+                            <div class="post-item clearfix">
+                                <img src="/assets/img/2.jpg" alt="Thumbnail"
+                                    style="width: 80px; height: 60px; object-fit: cover;">
+                                <h4><a href="/assets/img/slide-2.jpg" target="_blank">Đăng ký câu lạc bộ</a></h4>
+                                <p>Thời hạn đăng ký các CLB mới đã mở...</p>
+                            </div>
+
+                        </div>
                     </div>
-                </div>  
-                
+                </div>
+
                 @* Khối 3: HỖ TRỢ HỌC TẬP *@
                 <div class="card">
-                    <div class="card-header text-center bg-white border-bottom fw-bold text-uppercase p-3">
-                        HỖ TRỢ HỌC TẬP - DANH BẠ NỘI BỘ
+                    <div class="card-header bg-white border-bottom fw-bold p-3">
+                        Hỗ trợ học tập
                     </div>
                     <div class="card-body p-3">
-                       
+
                         <p class="fw-bold mb-1 mt-2">1. Văn Phòng & Quản Lý:</p>
                         <ul class="list-group list-group-flush border-bottom mb-3">
                             <li class="list-group-item p-1 border-0">
-                                <span class="fw-bold">- Văn phòng Đoàn/Giáo vụ:</span> Cô Võ Thị Anh Mai, SĐT: 0326466481
+                                <span class="fw-bold">- Văn phòng Đoàn/Giáo vụ:</span> Cô Võ Thị Anh Mai, SĐT:
+                                0326466481
                             </li>
                             <li class="list-group-item p-1 border-0">
-                                <span class="fw-bold">- Tư vấn Hướng nghiệp:</span> Cô Hà Thị Thúy, SĐT: 0917742789
+                                <span class="fw-bold">- Tư vấn hướng nghiệp:</span> Cô Hà Thị Thúy, SĐT: 0917742789
                             </li>
                             <li class="list-group-item p-1 border-0">
-                                <span class="fw-bold">- Phòng Thiết bị:</span> Cô Nguyễn Thị Mai Anh, SĐT: 0943603126
+                                <span class="fw-bold">- Phòng thiết bị:</span> Cô Nguyễn Thị Mai Anh, SĐT:
+                                0943603126
                             </li>
                             <li class="list-group-item p-1 border-0">
-                                <span class="fw-bold">- Thư viện:</span> Cô Lê Thị Thu Hien, SĐT: 0977346339
+                                <span class="fw-bold">- Thư viện:</span> Cô Lê Thị Thu Hiền, SĐT: 0977346339
                             </li>
                         </ul>
-                        <p class="fw-bold mb-1">2. Tổ Chuyên Môn:</p>
+                        <p class="fw-bold mb-1">2. Tổ chuyên Môn:</p>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item p-1 border-0">
                                 <span class="fw-bold">- Tổ Ngoại ngữ:</span> Thầy Lê Hùng Việt, SĐT: 0941492628
@@ -209,6 +90,5 @@
                     </div>
                 </div>
             </div>
-        </div>
     </section>
 </main>

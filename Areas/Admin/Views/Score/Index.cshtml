@@ -1,0 +1,159 @@
+@using System
+@using StudentManagement.Models;
+@model List<tblScore>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách điểm học sinh</h2>
+    </div>
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body mt-4">
+                        <table class="table table-borderless datatable">
+                            <thead>
+                                <tr>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-1 text-center">Mã học sinh</th>
+                                    <th class="col-2 text-center">Họ và tên</th>
+                                    <th class="col-1 text-center">Khối</th>
+                                    <th class="col-1 text-center">Lớp</th>
+                                    <th class="col-2 text-center">Môn học</th>
+                                    <th class="col-1 text-center">Học kỳ</th>
+                                    <th class="col-2 text-center">Năm học</th>
+                                    <th class="col-1 text-center">Điểm ĐGTX</th>
+                                    <th class="col-1 text-center">Điểm giữa kỳ</th>
+                                    <th class="col-1 text-center">Điểm cuối kỳ</th>
+                                    <th class="col-1 text-center">Điểm trung bình</th>
+                                    <th class="col-2 text-center">Học lực</th>
+                                    <th class="col-1 text-center">Trạng thái</th>
+                                    <th class="col-1 text-center">Chức năng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int stt = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    stt++;
+                                    // KHỐI KHAI BÁO BIẾN ACTIVECLASS ĐƯỢC DI CHUYỂN LÊN ĐÂY
+                                    // ************************************************************************************
+                                    var activeClass = item.student?.studentclass?.FirstOrDefault(hsl =>
+                                    hsl.IsActive)?._class;
+                                    // ************************************************************************************
+
+                                    <tr>
+                                        <td class="text-center">@stt</td>
+                                        <td class="text-center text-primary">
+                                            <a asp-area="Admin" asp-controller="Score" asp-action="Details"
+                                                asp-route-id="@item.ScoreID">
+                                                @item.StudentID
+                                            </a>
+                                        </td>
+                                        <td class="text-center">@item.student?.FullName</td>
+                                        <td class="text-center">
+                                            @activeClass?.grade?.GradeName
+                                        </td>
+                                        <td class="text-center">
+                                            @activeClass?.ClassName
+                                        </td>
+                                        <td class="text-center">@item.subject?.SubjectName</td>
+                                        <td class="text-center">@item.yearSemester?.SemesterName</td>
+                                        <td class="text-center">@item.yearSemester?.SchoolYear</td>
+                                        <td class="text-center">@item.Average_CA_Score</td>
+                                        <td class="text-center">@item.MidtermScore</td>
+                                        <td class="text-center">@item.FinalScore</td>
+                                        <td class="text-center">@item.AverageScore</td>
+                                        <td class="text-center">@item.AcademicRating</td>
+                                        <td class="text-center">
+                                            <form asp-area="Admin" asp-controller="Score" asp-action="ToggleStatus"
+                                                method="post">
+                                                <input type="hidden" name="id" value="@item.ScoreID" />
+                                                <div class="form-check form-switch d-flex justify-content-center">
+                                                    <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                        name="IsActive" @(item.IsActive ? "checked" : "")
+                                                        onchange="this.form.submit()" />
+                                                </div>
+                                            </form>
+                                        </td>
+                                        <td class="text-center">
+                                            <a asp-area="Admin" asp-controller="Score" asp-action="Edit"
+                                                asp-route-id="@item.ScoreID" class="btn btn-primary btn-sm"
+                                                title="Edit the score"><i class="bi bi-pencil"></i></a>
+                                            <a asp-area="Admin" asp-controller="Score" asp-action="Delete"
+                                                asp-route-id="@item.ScoreID" class="btn btn-danger btn-sm"
+                                                title="Delete the score"><i class="bi bi-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    // Xử lý khi click nút "Tải lên" -> click input file
+    document.getElementById("btn-Upload").addEventListener("click", function () {
+        document.getElementById("file-input").click();
+    });
+
+    // Tự động submit form khi người dùng chọn file
+    document.getElementById("file-input").addEventListener("change", function () {
+        this.form.submit();
+    });
+
+    // Hàm xử lý khi thay đổi bất kỳ dropdown lọc nào
+    function applyFilters() {
+        const classId = document.getElementById("classFilter").value;
+        const subjectId = document.getElementById("subjectFilter").value;
+        const academicYear = document.getElementById("schoolYearFilter").value;
+        const semester = document.getElementById("semesterOptionFilter").value;
+        
+        const url = new URL(window.location.origin + '@Url.Action("Index", "Score")');
+
+        if (classId && classId !== "0") url.searchParams.append("classFilterId", classId);
+        if (subjectId && subjectId !== "0") url.searchParams.append("subjectFilterId", subjectId);
+        if (academicYear) url.searchParams.append("schoolYearOption", academicYear); // Chú ý: Dùng tên tham số SchoolYearOption
+        if (semester) url.searchParams.append("semesterOption", semester);
+
+        window.location.href = url.toString();
+    }
+
+    // Gán sự kiện lọc
+    ["classFilter", "subjectFilter", "schoolYearFilter", "semesterOptionFilter"].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("change", applyFilters);
+        }
+    });
+
+    // Xử lý sự kiện click nút "Tải về Excel" duy nhất
+    document.getElementById("exportExcelBtn").addEventListener("click", function (event) {
+        const classId = document.getElementById("classFilter").value;
+        const subjectId = document.getElementById("subjectFilter").value;
+        const academicYear = document.getElementById("schoolYearFilter").value;
+        const semester = document.getElementById("semesterOptionFilter").value;
+
+        // SỬA TÊN CONTROLLER TỪ "QLDiem" THÀNH "Score"
+        const url = new URL(window.location.origin + '@Url.Action("ExportFilteredData", "Score")');
+
+        // Thêm các tham số lọc vào URL
+        if (classId && classId !== "0") url.searchParams.append("classFilterId", classId);
+        if (subjectId && subjectId !== "0") url.searchParams.append("subjectFilterId", subjectId);
+        if (academicYear) url.searchParams.append("schoolYearOption", academicYear); // Chú ý: Dùng tên tham số SchoolYearOption
+        if (semester) url.searchParams.append("semesterOption", semester);
+
+        // Chuyển hướng trình duyệt đến URL để tải file
+        window.location.href = url.toString();
+    });
+</script>

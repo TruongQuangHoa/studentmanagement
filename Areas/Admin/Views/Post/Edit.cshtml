@@ -1,0 +1,80 @@
+@using StudentManagement.Utilities
+@model StudentManagement.Models.tblPost
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Chỉnh sửa thông tin bài đăng</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Edit">
+            <div class="form-row">
+                <input type="text" class="form-control" asp-for="PostID" type="hidden">
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tiêu đề</label>
+                    <input type="text" class="form-control" asp-for="Title" required>
+                    <span asp-validation-for="Title" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tóm tắt</label>
+                    <input type="text" class="form-control" asp-for="Abstract" required>
+                    <span asp-validation-for="Abstract" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label class="control-label">Ảnh</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-success" type="button" onclick="openDialog('file_input')">Chọn ảnh</button>
+                        </div>
+                        <input type="text" class="form-control" asp-for="Images" id="file_input"
+                            aria-describedby="button-addon2" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Nội dung</label>
+                    <textarea asp-for="Contents" class="form-control"></textarea>
+                    <span asp-validation-for="Contents" class="text-danger mp-4"></span>
+                </div>
+
+                <div class="form-control d-none">
+                    <label>Ngày tạo</label>
+                    <input asp-for="CreatedDate" class="form-control" value="@Functions.getCurrentData()">
+                    <span asp-validation-for="CreatedDate" class="text-danger mp-4"></span>
+                </div>
+
+                <div class="form-control d-none">
+                    <label>Thứ tự bài đăng</label>
+                    <input type="text" asp-for="PostOrder" class="form-control" />
+                    <span asp-validation-for="PostOrder" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", Model.IsActive)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+            
+            <a asp-controller="Post" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>
+
+@{
+    var summerNote = new StudentManagement.Areas.Admin.Models.SummerNote("#Contents");
+    <partial name="_SummerNote" model="summerNote" />
+}

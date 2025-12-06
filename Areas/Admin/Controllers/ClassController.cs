@@ -21,16 +21,22 @@ namespace StudentManagement.Areas.Admin.Controllers
         // GET: Index
         public IActionResult Index()
         {
+            // Sử dụng Eager Loading (.Include()) để tải Grade và Cohort cùng lúc với Class
             var classList = _context.Classes
+                .Include(c => c.grade)  // Tải thông tin tblGrade liên quan
+                .Include(c => c.cohort) // Tải thông tin tblCohort liên quan
                 .OrderBy(c => c.GradeID)
                 .ThenBy(c => c.ClassID)
                 .ToList();
 
+            // Loại bỏ vòng lặp foreach để tải thủ công các thuộc tính quan hệ:
+            /*
             foreach (var cls in classList)
             {
                 cls.grade = _context.Grades.FirstOrDefault(g => g.GradeID == cls.GradeID);
                 cls.cohort = _context.Cohorts.FirstOrDefault(c => c.CohortID == cls.CohortID);
             }
+            */
 
             return View(classList);
         }

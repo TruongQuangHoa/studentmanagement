@@ -1,0 +1,71 @@
+@using System.Collections.Generic
+@using StudentManagement.Models;
+@model IList<tblYearSemester>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách năm học, học kỳ</h2>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body mt-4">
+                        <table class="table table-hover table-bordered datatable" style="background-color: white;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-1 text-center">Tên học kỳ</th>
+                                    <th class="col-1 text-center">Năm học</th>
+                                    <th class="col-1 text-center">Hiển thị</th>
+                                    <th class="col-1 text-center">Chức năng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int stt = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    stt++;
+                                    <tr>
+                                        <td class="text-center">@stt</td>
+                                        <td class="text-center">@item.SemesterName</td>
+                                        <td class="text-center">@item.SchoolYear</td>
+                                        <td class="text-center">
+                                            <form asp-area="Admin" asp-controller="YearSemester" asp-action="ToggleStatus"
+                                                method="post">
+                                                <input type="hidden" name="id" value="@item.YearSemesterID" />
+                                                <div class="form-check form-switch d-flex justify-content-center">
+                                                    <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                        name="IsActive" @(item.IsActive ? "checked" : "")
+                                                        onchange="this.form.submit()" />
+                                                </div>
+                                            </form>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <a asp-area="Admin" asp-controller="YearSemester" asp-action="Edit"
+                                                asp-route-id="@item.YearSemesterID" class="btn btn-primary btn-sm"
+                                                title="Edit the yearsemester"><i class="bi bi-pencil"></i></a>
+                                            <a asp-area="Admin" asp-controller="YearSemester" asp-action="Delete"
+                                                asp-route-id="@item.YearSemesterID" class="btn btn-danger btn-sm"
+                                                title="Delete the yearsemester"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xóa năm học - học kỳ này không?');"><i
+                                                    class="bi bi-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

@@ -5,24 +5,23 @@
 
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Sửa khóa</h2>
+        <h2>Sửa thông tin khóa học</h2>
     </div>
     <div class="container shadow p-5">
         <form method="Post" asp-action="Edit">
             <div class="form-row row">
                 <input type="hidden" asp-for="CohortID" />
-
                 <div class="form-group col-md-6 mb-3">
-                    <label>Năm vào</label>
-                    <input type="number" class="form-control" asp-for="StartYear" placeholder="Năm vào..."
+                    <label>Năm bắt đầu</label>
+                    <input type="number" class="form-control" asp-for="StartYear" placeholder="Năm bắt đầu..."
                         id="startYear" required>
                     <span asp-validation-for="StartYear" class="alert-danger"></span>
                 </div>
 
                 <div class="form-group col-md-6 mb-3">
-                    <label>Năm ra</label>
-                    <input type="number" class="form-control" asp-for="EndYear" placeholder="Năm ra..." id="endYear"
-                        readonly>
+                    <label>Năm kết thúc</label>
+                    <input type="number" class="form-control" asp-for="EndYear" placeholder="Năm kết thúc..."
+                        id="endYear" readonly>
                     <span asp-validation-for="EndYear" class="alert-danger"></span>
                 </div>
 
@@ -34,11 +33,10 @@
 
             </div>
             <div class="form-group col-md-6 mb-3">
-                <div class="form-check mt-3">
-                    @Html.CheckBox("IsActive", true, new { @class = "form-check-input", id = "IsActive" })
-                    <label class="form-check-label" for="IsActive">Hiển thị</label>
-                </div>
-
+                <label>
+                    @Html.CheckBox("IsActive", Model.IsActive)
+                    Hiển thị
+                </label>
             </div>
 
             <a asp-controller="Cohort" asp-action="Index" class="btn btn-lg btn-warning p-2">
@@ -65,8 +63,8 @@
             const suggestedEnd = start + 4;
             endYearInput.value = suggestedEnd;
 
-            // Tính niên khóa = EndYear - StartYear + 1
-            const cohortName = suggestedEnd - start + 1;
+            // Tính niên khóa
+            const cohortName = start - 1959;
             cohortNameInput.value = cohortName;
         } else {
             endYearInput.value = "";

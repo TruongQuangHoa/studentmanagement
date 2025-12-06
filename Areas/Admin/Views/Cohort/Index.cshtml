@@ -6,7 +6,6 @@
 <main id="main" class="main">
     <div class="pagetitle">
         <h2>Danh sách chức năng</h2>
-
         <p>
         <section class="section dashboard">
             <div class="row">
@@ -17,11 +16,10 @@
                                 <thead>
                                     <tr>
                                         <th class="col-1 text-center">STT</th>
-                                        <th class="col-1 text-center">Mã khóa</th>
-                                        <th class="col-2 text-center">Năm vào</th>
-                                        <th class="col-2 text-center">Năm ra</th>
+                                        <th class="col-2 text-center">Năm bắt đầu</th>
+                                        <th class="col-2 text-center">Năm kết thúc</th>
                                         <th class="col-1 text-center">Niên khóa</th>
-                                        <th class="col-1 text-center">Hiện thị</th>
+                                        <th class="col-1 text-center">Hiển thị</th>
                                         <th class="col-1 text-center">Chức năng</th>
                                     </tr>
                                 </thead>
@@ -32,39 +30,31 @@
                                     @foreach (var item in Model)
                                     {
                                         stt++; // 2. Tăng biến đếm cho mỗi mục
-                                        <tr>
-                                            <td class="text-center" scope="row">@stt</td>
-                                            <td class="text-left text-primary text-center" scope="row">
-                                                <a asp-area="Admin" asp-controller="QLKhoaHoc" asp-action="Details"
-                                                    asp-route-id="@item.CohortID">
-                                                    @item.CohortID
-                                                </a>
-                                            </td>
-                                            <td class="text-center" scope="row">@item.StartYear</td>
-                                            <td class="text-center" scope="row">@item.EndYear</td>
-                                            <td class="text-center" scope="row">@item.CohortName</td>
-
-                                            <td class="text-center">
-                                                <form asp-area="Admin" asp-controller="Cohort" asp-action="ToggleStatus"
-                                                    method="post">
-                                                    <input type="hidden" name="id" value="@item.CohortID" />
-                                                    <div class="form-check form-switch d-flex justify-content-center">
-                                                        <input class="form-check-input toggle-status-switch" type="checkbox"
-                                                            name="IsActive" @(item.IsActive ? "checked" : "")
-                                                            onchange="this.form.submit()" />
-                                                    </div>
-                                                </form>
-                                            </td>
-                                            <td class="text-center" scope="row">
-                                                <a asp-area="Admin" asp-controller="Cohort" asp-action="Edit"
-                                                    asp-route-id="@item.CohortID" class="btn btn-primary btn-sm"
-                                                    title="Edit the Cohort"><i class="bi bi-pencil"></i></a>
-                                                <a asp-area="Admin" asp-controller="Cohort" asp-action="Delete"
-                                                    asp-route-id="@item.CohortID" class="btn btn-danger btn-sm"
-                                                    title="Delete the Cohort"><i class="bi bi-trash"></i></a>
-
-                                            </td>
-                                        </tr>
+                                               <tr>
+                                                   <td class="text-center" scope="row">@stt</td>
+                                                   <td class="text-center" scope="row">@item.StartYear</td>
+                                                   <td class="text-center" scope="row">@item.EndYear</td>
+                                                   <td class="text-center" scope="row">@item.CohortName</td>
+                                                   <td class="text-center">
+                                                       <form asp-area="Admin" asp-controller="Cohort" asp-action="ToggleStatus"
+                                                           method="post">
+                                                           <input type="hidden" name="id" value="@item.CohortID" />
+                                                           <div class="form-check form-switch d-flex justify-content-center">
+                                                               <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                                   name="IsActive" @(item.IsActive ? "checked" : "")
+                                                                   onchange="this.form.submit()" />
+                                                           </div>
+                                                       </form>
+                                                   </td>
+                                                   <td class="text-center" scope="row">
+                                                       <a asp-area="Admin" asp-controller="Cohort" asp-action="Edit"
+                                                           asp-route-id="@item.CohortID" class="btn btn-primary btn-sm"
+                                                           title="Edit the cohort"><i class="bi bi-pencil"></i></a>
+                                                       <a asp-area="Admin" asp-controller="Cohort" asp-action="Delete"
+                                                           asp-route-id="@item.CohortID" class="btn btn-danger btn-sm"
+                                                           title="Delete the cohort"><i class="bi bi-trash"></i></a>
+                                                   </td>
+                                               </tr>
                                     }
                                 </tbody>
                             </table>
@@ -74,6 +64,5 @@
             </div>
         </section>
         </p>
-
     </div>
 </main>

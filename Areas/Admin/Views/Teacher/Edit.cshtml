@@ -1,0 +1,306 @@
+@model StudentManagement.Models.tblTeacher
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa thông tin giáo viên</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Edit">
+            <div class="form-row row">
+                <input type="text" class="form-contro" asp-for="ID" type="hidden">
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mã giáo viên</label>
+                    <input type="text" class="form-control" asp-for="TeacherID" placeholder="TeacherID..." readonly>
+                    <span asp-validation-for="TeacherID" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Họ Và tên</label>
+                    <input type="text" class="form-control" asp-for="FullName" placeholder="Nhập họ và tên..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ngày sinh</label>
+                    <input type="date" class="form-control" asp-for="Birth" placeholder="Nhập ngày sinh..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Giới tính</label>
+                    <select asp-for="Gender" class="form-select" id="Gender">
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Tỉnh/Thành phố</label>
+                    <input id="provinceInput" class="form-control" name="Province" value="@Model?.Province"
+                        placeholder="Nhập hoặc chọn tỉnh/thành phố" autocomplete="off" required />
+                    <select id="provinceSelect" size="5" class="form-select mt-1" style="display:none;"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Xã/Phường</label>
+                    <input id="wardInput" class="form-control" name="Commune" value="@Model?.Commune"
+                        placeholder="Nhập hoặc chọn xã/phường" autocomplete="off" required />
+                    <select id="wardSelect" size="5" class="form-select mt-1" style="display:none;"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Nhập xóm</label>
+                    <input type="text" class="form-control" id="hamletInput" name="Hamlet" value="@Model?.Hamlet"
+                        placeholder="Nhập xóm..." required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Quốc tịch</label>
+                    <input id="quocTich" class="form-control" name="Nationality"
+                        value="@(Model?.Nationality ?? "Việt Nam")" placeholder="Việt Nam" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Địa chỉ đầy đủ</label>
+                    <input id="address" class="form-control" name="Address" value="@Model?.Address" readonly />
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Trạng thái giáo viên</label>
+                    <select asp-for="StatusTeacher" class="form-select" id="StatusTeacher">
+                        <option value="Đang dạy">Đang dạy</option>
+                        <option value="Nghỉ dạy">Nghỉ dạy</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>CCCD</label>
+                    <input type="text" class="form-control" asp-for="CCCD" placeholder="Nhập cccd..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Dân tộc</label>
+                    <input type="text" class="form-control" asp-for="Nation" placeholder="Nhập dân tộc.." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tôn giáo</label>
+                    <select asp-for="Religion" class="form-select" id="Religion">
+                        <option value="Có">Có</option>
+                        <option value="Không">Không</option>
+                        <option value="Không xác định">Không xác định</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Đảng viên</label>
+                    <select asp-for="GroupDV" class="form-select" id="GroupDV">
+                        <option value="Đã vào">Đã vào</option>
+                        <option value="Chưa vào">Chưa vào</option>
+                        <option value="Không xác định">Không xác định</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Số điện thoại</label>
+                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..."
+                        required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Số BHXH</label>
+                    <input type="text" class="form-control" asp-for="NumberBHXH" placeholder="Nhập số BHXH..." required>
+                </div>
+
+                <div class="form-group col-md-4 mb-3">
+                    <label>Bộ môn</label>
+                    <select asp-for="DepartmentID" class="form-control" asp-items="ViewBag.dpList">
+                        <option value="">--- Tên bộ môn ---</option>
+                    </select>
+                </div>
+                @{
+                    var selectedSubjects = ViewBag.SelectedSubjects as List<int> ?? new List<int>();
+                    var subjects = ViewBag.sbList as SelectList;
+                }
+
+                <div class="form-group">
+                    <label>Môn học giáo viên dạy</label>
+                    <div>
+                        @foreach (var subject in subjects)
+                        {
+                            var isChecked = selectedSubjects.Contains(int.Parse(subject.Value));
+
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" class="form-check-input" name="SelectedSubjectIDs"
+                                    value="@subject.Value" @(isChecked ? "checked" : "") />
+                                <label class="form-check-label">@subject.Text</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", Model.IsActive)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+            <a asp-controller="Teacher" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const hamletInput = document.getElementById('hamletInput');
+        const provinceInput = document.getElementById('provinceInput');
+        const provinceSelect = document.getElementById('provinceSelect');
+        // const districtInput = document.getElementById('districtInput'); // Loại bỏ districtInput
+        // const districtSelect = document.getElementById('districtSelect'); // Loại bỏ districtSelect
+        const wardInput = document.getElementById('wardInput');
+        const wardSelect = document.getElementById('wardSelect');
+        const quocTichInput = document.getElementById('quocTich');
+        const addressInput = document.getElementById('address');
+
+        let provinces = [];
+        // let districts = []; // Loại bỏ districts
+        let wards = [];
+
+        // Load provinces
+        fetch('https://provinces.open-api.vn/api/p/')
+            .then(res => res.json())
+            .then(data => {
+                provinces = data;
+                renderSelectOptions(provinceSelect, provinces);
+            });
+
+        function renderSelectOptions(selectElem, items) {
+            selectElem.innerHTML = '';
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.code;
+                option.textContent = item.name;
+                selectElem.appendChild(option);
+            });
+        }
+
+        function filterItems(list, text) {
+            return list.filter(item => item.name.toLowerCase().includes(text.toLowerCase()));
+        }
+
+        function toggleDropdown(selectElem, show) {
+            selectElem.style.display = show ? 'block' : 'none';
+        }
+
+        // ----- PROVINCE -----
+        provinceInput.addEventListener('focus', () => {
+            renderSelectOptions(provinceSelect, provinces);
+            toggleDropdown(provinceSelect, true);
+        });
+
+        provinceInput.addEventListener('input', () => {
+            const filtered = filterItems(provinces, provinceInput.value);
+            renderSelectOptions(provinceSelect, filtered);
+            toggleDropdown(provinceSelect, filtered.length > 0);
+        });
+
+        provinceInput.addEventListener('blur', () => {
+            setTimeout(() => toggleDropdown(provinceSelect, false), 200);
+        });
+
+        provinceSelect.addEventListener('click', (e) => {
+            const selected = provinceSelect.options[provinceSelect.selectedIndex];
+            if (!selected) return;
+            provinceInput.value = selected.textContent;
+            toggleDropdown(provinceSelect, false);
+            // loadDistricts(selected.value); // Loại bỏ gọi loadDistricts
+            // districtInput.value = ''; // Loại bỏ districtInput.value = '';
+            wardInput.value = ''; // Đặt lại wardInput khi chọn Tỉnh/Thành phố mới
+            updateFullAddress();
+        });
+
+        // Loại bỏ hàm loadDistricts
+        // function loadDistricts(provinceCode) { ... }
+
+        // ----- WARD -----
+        wardInput.addEventListener('focus', () => {
+            // Khi chỉ còn Tỉnh và Xã/Phường, ta cần load danh sách Xã/Phường dựa trên Tỉnh đã chọn
+            // Bạn cần một API khác để lấy danh sách Xã/Phường trực tiếp từ Tỉnh/Thành phố.
+            // Ví dụ: fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`) sẽ trả về districts.
+            // Để lấy wards, ta cần một API khác, ví dụ: fetch(`https://provinces.open-api.vn/api/d/{district_code}?depth=2`)
+            // Tuy nhiên, vì đã loại bỏ cấp Huyện, bạn sẽ cần tìm một API cung cấp danh sách Xã/Phường dựa trên Tỉnh/Thành phố trực tiếp.
+            // Giả định tạm thời là bạn có thể lấy danh sách wards từ tỉnh:
+            const provinceCode = provinces.find(p => p.name === provinceInput.value)?.code;
+            if (provinceCode) {
+                fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`)
+                    .then(res => res.json())
+                    .then(data => {
+                        wards = data.wards || []; // Giả định API trả về danh sách wards trực tiếp
+                        renderSelectOptions(wardSelect, wards);
+                        wardInput.disabled = false;
+                    });
+            } else {
+                wardInput.disabled = true; // Vô hiệu hóa nếu không có tỉnh được chọn
+            }
+            if (wards.length > 0) {
+                renderSelectOptions(wardSelect, wards);
+                toggleDropdown(wardSelect, true);
+            }
+        });
+
+
+        wardInput.addEventListener('input', () => {
+            const filtered = filterItems(wards, wardInput.value);
+            renderSelectOptions(wardSelect, filtered);
+            toggleDropdown(wardSelect, filtered.length > 0);
+        });
+
+        wardInput.addEventListener('blur', () => {
+            setTimeout(() => toggleDropdown(wardSelect, false), 200);
+        });
+
+        wardSelect.addEventListener('click', (e) => {
+            const selected = wardSelect.options[wardSelect.selectedIndex];
+            if (!selected) return;
+            wardInput.value = selected.textContent;
+            toggleDropdown(wardSelect, false);
+            updateFullAddress();
+        });
+
+        // ----- UPDATE FULL ADDRESS -----
+        [hamletInput, wardInput, provinceInput, quocTichInput].forEach(input => { // Loại bỏ districtInput khỏi danh sách
+            input.addEventListener('input', updateFullAddress);
+            input.addEventListener('change', updateFullAddress);
+        });
+
+        function updateFullAddress() {
+            const hamlet = hamletInput.value.trim();
+            const ward = wardInput.value.trim();
+            const province = provinceInput.value.trim();
+            const nation = quocTichInput.value.trim() || "Việt Nam";
+
+            // Tạo địa chỉ đầy đủ theo định dạng: Xóm, Xã/Phường, Tỉnh/Thành phố, Quốc tịch
+            const addressParts = [];
+            if (hamlet) addressParts.push(hamlet);
+            if (ward) addressParts.push(ward);
+            if (province) addressParts.push(province);
+            addressParts.push(nation);
+
+            addressInput.value = addressParts.join(', ');
+        }
+
+        // Khởi tạo giá trị ban đầu
+        if (provinceInput.value && wardInput.value) { // Chỉ kiểm tra tỉnh và xã/phường
+            updateFullAddress();
+        }
+    });
+</script>

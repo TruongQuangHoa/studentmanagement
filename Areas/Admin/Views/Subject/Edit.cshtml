@@ -1,0 +1,58 @@
+@model StudentManagement.Models.tblSubject
+Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa thông tin môn học</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Edit">
+            <div class="form-row row">
+                <input type="text" class="form-contro" asp-for="SubjectID" type="hidden">
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tên môn học</label>
+                    <input type="text" class="form-control" asp-for="SubjectName" placeholder="Tên môn học..." required>
+                    <span asp-validation-for="SubjectName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Số tiết</label>
+                    <input type="number" min="0" class="form-control" asp-for="NumberOfLesson" placeholder="Số tiết...">
+                    <span asp-validation-for="NumberOfLesson" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Học kỳ</label>
+                    <select asp-for="Semester" class="form-control" id="Semester" required>
+                        <option value="">--- Chọn học kỳ ---</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="1 và 2">1 và 2</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Bộ môn</label>
+                    <select asp-for="DepartmentID" class="form-control" asp-items="ViewBag.dpList" required>
+                        <option value="">--- Tên bộ môn ---</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", Model.IsActive)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+            <a asp-controller="Subject" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>

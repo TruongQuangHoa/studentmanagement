@@ -4,43 +4,54 @@
 }
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Sửa Học sinh - Lớp học</h2>
+        <h2>Sửa thông tin học sinh - lớp học</h2>
     </div>
     <div class="container shadow p-5">
         <form method="post" asp-action="Edit">
             @Html.AntiForgeryToken()
-            
+
             <div class="form-row">
                 <input type="hidden" asp-for="StudentClassID" />
-                
-                <div class="form-group col-md-6 mb-3">
-                    <label>Học sinh</label>
-                    <select asp-for="StudentID" class="form-select" 
-                            asp-items="@(ViewBag.StudentList as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>()))">
-                        <option value="">-- Chọn học sinh --</option>
-                    </select>
-                    <span asp-validation-for="StudentID" class="text-danger"></span>
-                </div>
+                <input type="hidden" asp-for="StudentID" /> @* <-- GIỮ TRƯỜNG ẨN *@
+                <input type="hidden" asp-for="CohortID" /> @* <-- GIỮ TRƯỜNG ẨN CohortID (hoặc xóa nếu không dùng) *@
+                <input type="hidden" asp-for="YearSemesterID" />
 
                 <div class="form-group col-md-6 mb-3">
-                    <label>Lớp học</label>
-                    <select asp-for="ClassID" class="form-select" 
-                            asp-items="@(ViewBag.ClassList as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>()))">
-                        <option value="">-- Chọn lớp --</option>
-                    </select>
-                    <span asp-validation-for="ClassID" class="text-danger"></span>
+                    <label>Học sinh</label>
+                    <input type="text" class="form-control" value="@(Model.StudentID) - @(Model.student?.FullName)"
+                        readonly="readonly" />
+                    <span asp-validation-for="StudentID" class="text-danger"></span>
                 </div>
 
                 <!-- Khóa học -->
                 <div class="form-group col-md-4 mb-3">
                     <label>Khóa học</label>
-                    <select asp-for="CohortID" class="form-control" 
-                            asp-items="@(ViewBag.CohortList as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>()))">
+                    <select asp-for="CohortID" class="form-control"
+                        asp-items="@(ViewBag.CohortList as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>()))">
                         <option value="">--- Chọn khóa học ---</option>
                     </select>
                     <span asp-validation-for="CohortID" class="text-danger"></span>
                 </div>
-                
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Lớp học</label>
+                    <select asp-for="ClassID" class="form-select"
+                        asp-items="@(ViewBag.ClassList as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>()))">
+                        <option value="">-- Chọn lớp --</option>
+                    </select>
+                    <span asp-validation-for="ClassID" class="text-danger"></span>
+                </div>
+
+                @* Thêm trường Học kỳ *@
+                <div class="form-group col-md-6 mb-3">
+                    <label>Học kỳ</label>
+                    <select asp-for="YearSemesterID" class="form-select" 
+                            asp-items="@(ViewBag.SemesterList as SelectList ?? new SelectList(Enumerable.Empty<SelectListItem>()))">
+                        <option value="">-- Chọn học kỳ --</option>
+                    </select>
+                    <span asp-validation-for="YearSemesterID" class="text-danger"></span>
+                </div>
+
                 <!-- Hiển thị -->
                 <div class="col-md-6 mb-3">
                     <div class="form-check">
@@ -56,7 +67,9 @@
                 <div class="alert alert-danger">
                     @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                     {
-                        <span>@error.ErrorMessage</span><br />
+                        <span>@error.ErrorMessage</span>
+
+                        <br />
                     }
                 </div>
             }

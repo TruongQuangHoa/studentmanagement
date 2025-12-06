@@ -4,28 +4,28 @@
 }
 <main id="main" class="main">
     <div class="pagetitle">
-        <h2>Sửa thông tin khối</h2>
+        <h2>Sửa thông tin khối lớp</h2>
     </div>
     <div class="container shadow p-5">
         <form method="Post" asp-action="Edit">
             <div class="form-row">
-                <input type="text" class="form-contro" asp-for ="GradeID" type="hidden">
+                <input type="text" class="form-contro" asp-for="GradeID" type="hidden">
                 <div class="form-group col-md-6 mb-3">
-                    <lable>Tên khối</lable>
-                    <input type="text" class="form-control" asp-for="GradeName" placeholder="Tên khối...">
+                    <lable>Tên khối lớp</lable>
+                    <input type="number" min="6" max="9" class="form-control" asp-for="GradeName"
+                        placeholder="Tên khối lớp.." required>
                     <span asp-validation-for="GradeName" class="alert-danger"></span>
                 </div>
-        
+
                 <div class="form-group col-md-6 mb-3">
                     <label>Mô tả</label>
-                    <input type="text" class="form-control" asp-for="Description"
-                        placeholder="Nhập mô tả...">
+                    <input type="text" class="form-control" asp-for="Description" placeholder="Nhập mô tả..." required>
                 </div>
-                                
+
                 <div class="form-group col-md-6 mb-3">
                     <label>
-                        @Html.CheckBox("IsActive",Model.IsActive)
-                        Hiện thị
+                        @Html.CheckBox("IsActive", Model.IsActive)
+                        Hiển thị
                     </label>
                 </div>
             </div>

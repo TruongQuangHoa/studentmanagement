@@ -14,20 +14,24 @@ namespace StudentManagement.Models
         [Key]
         public int StudentClassID { get; set; }
         [Column("StudentID")]
-        public string? StudentID { get; set; }
-        public int ClassID { get; set; }
-        public bool IsActive { get; set; }
 
+        public string? StudentID { get; set; }
         [ForeignKey(nameof(StudentID))]
         public tblStudent? student { get; set; }
+
+        public int? YearSemesterID { get; set; }
+        [ForeignKey(nameof(YearSemesterID))]
+        public tblYearSemester? yearSemester { get; set; }
 
         public int? CohortID { get; set; }
         [ForeignKey(nameof(CohortID))]
         public tblCohort? cohort { get; set; }
 
+        public int ClassID { get; set; }
         // Quan hệ ngược lại lớp
         [JsonIgnore] // chặn vòng lặp
         [ForeignKey(nameof(ClassID))]
         public virtual tblClass? _class { get; set; }
+        public bool IsActive { get; set; }
     }
 }
