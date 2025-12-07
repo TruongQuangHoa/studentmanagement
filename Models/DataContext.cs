@@ -15,20 +15,20 @@ namespace StudentManagement.Models
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
         }
-        public DbSet<tblMenu> Menus { get; set; }
-        public DbSet<AdminMenu> AdminMenus { get; set; }
-        public DbSet<tblCohort> Cohorts { get; set; }
-        public DbSet<tblGrade> Grades { get; set; }
-        public DbSet<tblYearSemester> YearSemesters { get; set; }
-        public DbSet<tblDepartment> Departments { get; set; }
-        public DbSet<tblSubject> Subjects { get; set; }
-        public DbSet<tblTeacher> Teachers { get; set; }
-        public DbSet<tblTeacherSubject> TeacherSubjects { get; set; }
-        public DbSet<tblClass> Classes { get; set; }
-        public DbSet<tblStudent> Students { get; set; }
-        public DbSet<tblStudentClass> StudentClasses { get; set; }
-        public DbSet<tblScore> Scores { get; set; }
-        public DbSet<tblPost> Posts { get; set; }
+        public DbSet<tblMenu> Menus { get; set; } = null!;
+        public DbSet<AdminMenu> AdminMenus { get; set; } = null!;
+        public DbSet<tblCohort> Cohorts { get; set; } = null!;
+        public DbSet<tblGrade> Grades { get; set; } = null!;
+        public DbSet<tblYearSemester> YearSemesters { get; set; } = null!;
+        public DbSet<tblDepartment> Departments { get; set; } = null!;
+        public DbSet<tblSubject> Subjects { get; set; } = null!;
+        public DbSet<tblTeacher> Teachers { get; set; } = null!;
+        public DbSet<tblTeacherSubject> TeacherSubjects { get; set; } = null!;
+        public DbSet<tblClass> Classes { get; set; } = null!;
+        public DbSet<tblStudent> Students { get; set; } = null!;
+        public DbSet<tblStudentClass> StudentClasses { get; set; } = null!;
+        public DbSet<tblScore> Scores { get; set; } = null!;
+        public DbSet<tblPost> Posts { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

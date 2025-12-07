@@ -354,10 +354,7 @@ namespace StudentManagement.Areas.Admin.Controllers
                 return View(model);
             }
 
-            _context.StudentClasses.Update(model);
-            _context.SaveChanges();
-
-            if (oldEntity != null)
+            try
             {
                 // Cập nhật dữ liệu
                 existing.StudentID = model.StudentID;
@@ -365,6 +362,7 @@ namespace StudentManagement.Areas.Admin.Controllers
                 existing.YearSemesterID = model.YearSemesterID;
                 existing.IsActive = model.IsActive;
 
+                _context.Update(existing);
                 _context.SaveChanges();
 
                 // === CẬP NHẬT LẠI SỐ LƯỢNG HỌC SINH CHO CẢ LỚP CŨ VÀ LỚP MỚI ===
@@ -391,15 +389,13 @@ namespace StudentManagement.Areas.Admin.Controllers
                 LoadData(model.ClassID, model.YearSemesterID);
                 return View(model);
             }
-            LoadData();
-            return RedirectToAction("Index");
         }
 
         public IActionResult Delete(int id)
         {
             var entity = _context.StudentClasses.Include(h => h.student)
                                                   .Include(h => h._class)
-                                                  .ThenInclude(l => l.grade)
+                                                  .ThenInclude(l => l!.grade)
                                                   .FirstOrDefault(h => h.StudentClassID == id);
             if (entity == null) return NotFound();
             return View(entity);

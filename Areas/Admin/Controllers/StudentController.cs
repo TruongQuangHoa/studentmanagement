@@ -69,7 +69,7 @@ namespace StudentManagement.Areas.Admin.Controllers
         public async Task<IActionResult> Create(tblStudent student, int? ClassID) // Thêm ClassID để lưu lớp luôn
         {
             // Kiểm tra xem StudentID đã tồn tại chưa
-            if (_context.Students.Any(t => t.StudentID == st.StudentID))
+            if (_context.Students.Any(t => t.StudentID == student.StudentID))
             {
                 // Thêm lỗi vào ModelState
                 ModelState.AddModelError("StudentID", "Mã học sinh này đã tồn tại trong hệ thống.");
